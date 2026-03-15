@@ -1,7 +1,7 @@
 {
-  "name": "open-whispr",
-  "version": "1.6.3",
-  "description": "A desktop dictation application using whisper.cpp for speech-to-text transcription",
+  "name": "akash-scribe",
+  "version": "0.0.1",
+  "description": "A desktop dictation application that uses Akash ML for speech-to-text transcription",
   "main": "main.js",
   "private": true,
   "engines": {
@@ -74,8 +74,8 @@
     "desktop-app"
   ],
   "author": {
-    "name": "OpenWhispr Team",
-    "email": "support@openwhispr.com"
+    "name": "Akash Vanguards",
+    "email": "support@akash.network"
   },
   "license": "MIT",
   "devDependencies": {
@@ -89,6 +89,7 @@
     "concurrently": "^8.2.2",
     "cross-env": "^10.0.0",
     "electron": "^39.0.0",
+    "electron-build": "^0.0.3",
     "electron-builder": "^26.4.0",
     "eslint": "^9.25.0",
     "eslint-plugin-react-hooks": "^5.2.0",

@@ -1,6 +1,6 @@
 {
-  "appId": "com.herotools.openwispr",
-  "productName": "OpenWhispr",
+  "appId": "network.akash.akashscribe",
+  "productName": "Akash Scribe",
   "protocols": {
     "name": "OpenWhispr Protocol",
     "schemes": ["openwhispr"]
