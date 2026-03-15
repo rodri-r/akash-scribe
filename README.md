@@ -1,8 +1,8 @@
 <p align="center">
   <img src="src/assets/logo.svg" alt="OpenWhispr" width="120" />
-</p>
 
-<h1 align="center">OpenWhispr</h1>
+<h1 align="center">Scribe</h1>
+</p>
 
 <p align="center">
   <a href="https://github.com/OpenWhispr/openwhispr/blob/main/LICENSE"><img src="https://img.shields.io/github/license/OpenWhispr/openwhispr?style=flat" alt="License" /></a>
