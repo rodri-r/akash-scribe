@@ -77,6 +77,7 @@ import { useUsage } from "../hooks/useUsage";
 import { cn } from "./lib/utils";
 import { startMigration, useMigration } from "../stores/noteStore.js";
 import { formatBytes } from "../utils/formatBytes";
+import { useSettingsStore } from "../stores/settingsStore";
 
 const formatAmount = (cents: number, currency: string) =>
   (cents / 100).toLocaleString(undefined, { style: "currency", currency });
@@ -711,6 +712,9 @@ export default function SettingsPage({ activeSection = "general" }: SettingsPage
     setCustomDictionary,
   } = useSettings();
 
+  const meetingAudioDetection = useSettingsStore((s) => s.meetingAudioDetection);
+  const setMeetingAudioDetection = useSettingsStore((s) => s.setMeetingAudioDetection);
+
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
 
@@ -863,7 +867,7 @@ export default function SettingsPage({ activeSection = "general" }: SettingsPage
     []
   );
 
-  const [isUsingGnomeHotkeys, setIsUsingGnomeHotkeys] = useState(false);
+  const [isUsingNativeShortcut, setIsUsingNativeShortcut] = useState(false);
 
   const platform = getCachedPlatform();
 
@@ -929,8 +933,8 @@ export default function SettingsPage({ activeSection = "general" }: SettingsPage
     const checkHotkeyMode = async () => {
       try {
         const info = await window.electronAPI?.getHotkeyModeInfo();
-        if (info?.isUsingGnome) {
-          setIsUsingGnomeHotkeys(true);
+        if (info?.isUsingNativeShortcut) {
+          setIsUsingNativeShortcut(true);
           setActivationMode("tap");
         }
       } catch (error) {
@@ -1990,6 +1994,32 @@ export default function SettingsPage({ activeSection = "general" }: SettingsPage
               </SettingsPanel>
             </div>
 
+            {/* Meeting Detection */}
+            <div>
+              <SectionHeader
+                title={t("calendar.detection.title")}
+                description={t("calendar.detection.description")}
+              />
+              <SettingsPanel>
+                <SettingsPanelRow>
+                  <SettingsRow
+                    label={t("calendar.detection.audioDetection")}
+                    description={t("calendar.detection.audioDescription")}
+                  >
+                    <Toggle
+                      checked={meetingAudioDetection}
+                      onChange={(value) => {
+                        setMeetingAudioDetection(value);
+                        window.electronAPI?.meetingDetectionSetPreferences?.({
+                          audioDetection: value,
+                        });
+                      }}
+                    />
+                  </SettingsRow>
+                </SettingsPanelRow>
+              </SettingsPanel>
+            </div>
+
             {/* Clipboard */}
             <div>
               <SectionHeader title={t("settingsPage.general.clipboard.title")} />
@@ -2632,7 +2662,7 @@ EOF`,
                   )}
                 </SettingsPanelRow>
 
-                {!isUsingGnomeHotkeys && (
+                {!isUsingNativeShortcut && (
                   <SettingsPanelRow>
                     <p className="text-xs font-medium text-muted-foreground/80 mb-2">
                       {t("settingsPage.general.hotkey.activationMode")}

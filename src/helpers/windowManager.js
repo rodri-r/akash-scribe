@@ -42,7 +42,8 @@ class WindowManager {
   }
 
   async createMainWindow() {
-    const display = screen.getPrimaryDisplay();
+    const cursorPos = screen.getCursorScreenPoint();
+    const display = screen.getDisplayNearestPoint(cursorPos);
     const position = WindowPositionUtil.getMainWindowPosition(
       display,
       null,
@@ -488,6 +489,14 @@ class WindowManager {
     return this.hotkeyManager.isUsingGnome();
   }
 
+  isUsingHyprlandHotkeys() {
+    return this.hotkeyManager.isUsingHyprland();
+  }
+
+  isUsingNativeShortcutHotkeys() {
+    return this.hotkeyManager.isUsingNativeShortcut();
+  }
+
   async startWindowDrag() {
     return await this.dragManager.startWindowDrag();
   }
@@ -642,6 +651,10 @@ class WindowManager {
 
     this.agentWindow.once("ready-to-show", () => {
       WindowPositionUtil.setupAlwaysOnTop(this.agentWindow);
+    });
+
+    this.agentWindow.webContents.on("did-finish-load", () => {
+      this.agentWindow.setTitle(i18nMain.t("window.agentChatTitle"));
     });
 
     this.agentWindow.on("closed", () => {
@@ -824,9 +837,37 @@ class WindowManager {
     this.agentWindow.setBounds(bounds);
   }
 
+  _repositionToCursorDisplay() {
+    if (!this.mainWindow || this.mainWindow.isDestroyed()) return;
+
+    const cursorPos = screen.getCursorScreenPoint();
+    const cursorDisplay = screen.getDisplayNearestPoint(cursorPos);
+
+    const currentBounds = this.mainWindow.getBounds();
+    const currentDisplay = screen.getDisplayNearestPoint({
+      x: currentBounds.x + currentBounds.width / 2,
+      y: currentBounds.y + currentBounds.height / 2,
+    });
+
+    if (currentDisplay.id === cursorDisplay.id) return;
+
+    const newPos = WindowPositionUtil.getMainWindowPosition(
+      cursorDisplay,
+      { width: currentBounds.width, height: currentBounds.height },
+      this._panelStartPosition
+    );
+    this.mainWindow.setBounds(newPos);
+  }
+
   showDictationPanel(options = {}) {
     const { focus = false } = options;
     if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+      const wasHidden = !this.mainWindow.isVisible() || this.mainWindow.isMinimized();
+
+      if (wasHidden) {
+        this._repositionToCursorDisplay();
+      }
+
       if (this.mainWindow.isMinimized()) {
         this.mainWindow.restore();
       }
@@ -1062,6 +1103,10 @@ class WindowManager {
 
     if (this.mainWindow && !this.mainWindow.isDestroyed()) {
       this.mainWindow.setTitle(i18nMain.t("window.voiceRecorderTitle"));
+    }
+
+    if (this.agentWindow && !this.agentWindow.isDestroyed()) {
+      this.agentWindow.setTitle(i18nMain.t("window.agentChatTitle"));
     }
   }
 

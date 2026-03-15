@@ -65,11 +65,17 @@ OpenWhispr is an Electron-based desktop dictation application that uses whisper.
   - Auto-fallback to F8/F9 if default hotkey is unavailable
   - Notifies renderer via IPC when hotkey registration fails
   - Integrates with GnomeShortcutManager for GNOME Wayland support
+  - Integrates with HyprlandShortcutManager for Hyprland Wayland support
 - **gnomeShortcut.js**: GNOME Wayland global shortcut integration
   - Uses D-Bus service to receive hotkey toggle commands
   - Registers shortcuts via gsettings (visible in GNOME Settings → Keyboard → Shortcuts)
   - Converts Electron hotkey format to GNOME keysym format
   - Only active on Linux + Wayland + GNOME desktop
+- **hyprlandShortcut.js**: Hyprland Wayland global shortcut integration
+  - Uses D-Bus service to receive hotkey toggle commands (same `com.openwhispr.App` service)
+  - Registers shortcuts via `hyprctl keyword bind` (runtime keybinding)
+  - Converts Electron hotkey format to Hyprland bind format (`MODS, key`)
+  - Only active on Linux + Wayland + Hyprland (detected via `HYPRLAND_INSTANCE_SIGNATURE`)
 - **ipcHandlers.js**: Centralized IPC handler registration
 - **windowsKeyManager.js**: Windows Push-to-Talk support with native key listener
   - Spawns native `windows-key-listener.exe` binary for low-level keyboard hooks
@@ -271,7 +277,6 @@ Environment variables persisted to `.env` (via `saveAllKeysToEnvFile()`):
 ### 8. Model Registry Architecture
 
 All AI model definitions are centralized in `src/models/modelRegistryData.json` as the single source of truth:
-
 ```json
 {
   "cloudProviders": [...],   // OpenAI, Anthropic, Gemini API models
@@ -409,8 +414,8 @@ On GNOME Wayland, Electron's `globalShortcut` API doesn't work due to Wayland's 
 - gsettings path: `/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/openwhispr/`
 
 **IPC Integration**:
-- `get-hotkey-mode-info`: Returns `{ isUsingGnome: boolean }` to renderer
-- UI hides activation mode selector when `isUsingGnome` is true
+- `get-hotkey-mode-info`: Returns `{ isUsingGnome, isUsingHyprland, isUsingNativeShortcut }` to renderer
+- UI hides activation mode selector when `isUsingNativeShortcut` is true
 - Forces tap-to-talk mode (push-to-talk not supported)
 
 **Hotkey Format Conversion**:
@@ -418,7 +423,36 @@ On GNOME Wayland, Electron's `globalShortcut` API doesn't work due to Wayland's 
 - GNOME format: `<Alt>r`, `<Control><Shift>space`
 - Backtick (`) → `grave` in GNOME keysym format
 
-### 15. Meeting Detection (Event-Driven)
+### 15. Hyprland Wayland Global Hotkeys
+
+On Hyprland (wlroots Wayland compositor), Electron's `globalShortcut` API and the `GlobalShortcutsPortal` feature don't work reliably. OpenWhispr uses native Hyprland keybindings:
+
+**Architecture**:
+1. `main.js` enables `GlobalShortcutsPortal` feature flag for Wayland (fallback)
+2. `hotkeyManager.js` detects Hyprland + Wayland and initializes `HyprlandShortcutManager`
+3. `hyprlandShortcut.js` creates D-Bus service at `com.openwhispr.App` (same as GNOME)
+4. Shortcuts registered via `hyprctl keyword bind` (runtime keybinding)
+5. Hyprland triggers `dbus-send` command which calls the D-Bus `Toggle()` method
+
+**Detection**:
+- Primary: `HYPRLAND_INSTANCE_SIGNATURE` environment variable (set by Hyprland)
+- Fallback: `XDG_CURRENT_DESKTOP` contains "hyprland"
+
+**Hotkey Format Conversion**:
+- Electron format: `Alt+R`, `CommandOrControl+Shift+Space`
+- Hyprland format: `ALT, R`, `CTRL SHIFT, space`
+- Modifier-only combos (e.g., `Control+Super`) → `CTRL, Super_L`
+
+**Bind/Unbind Commands**:
+- Register: `hyprctl keyword bind "ALT, R, exec, dbus-send --session ..."`
+- Unregister: `hyprctl keyword unbind "ALT, R"`
+- Bindings are ephemeral (don't survive Hyprland restart) but re-registered on app startup
+
+**Limitations**:
+- Push-to-talk not supported (Hyprland `bind` fires a single exec, not key-down/key-up)
+- Requires `hyprctl` on PATH (ships with Hyprland)
+
+### 16. Meeting Detection (Event-Driven)
 
 Detects meetings via three independent sources, orchestrated by `MeetingDetectionEngine`:
 
@@ -500,7 +534,8 @@ const { t } = useTranslation();
 - [ ] Test custom dictionary with uncommon words
 - [ ] Verify Windows Push-to-Talk with compound hotkeys
 - [ ] Test GNOME Wayland hotkeys (if on GNOME + Wayland)
-- [ ] Verify activation mode selector is hidden on GNOME Wayland
+- [ ] Test Hyprland Wayland hotkeys (if on Hyprland + Wayland)
+- [ ] Verify activation mode selector is hidden on GNOME Wayland and Hyprland Wayland
 - [ ] Verify meeting detection works with event-driven mode (check debug logs for "event-driven")
 - [ ] Test meeting notification suppression during recording
 - [ ] Test post-recording cooldown (notifications shouldn't flash immediately)
