@@ -23,6 +23,12 @@ import MeetingNotificationOverlay from "./components/MeetingNotificationOverlay.
 
 let root = null;
 
+// ─── Channel / OAuth config ───────────────────────────────────────────────────
+// AKASHML: The OAuth protocol identifiers below still reference "openwhispr-*"
+// because they are registered deep in the Electron main process and in the
+// Neon Auth dashboard. Changing them here without updating those registrations
+// would break the sign-in flow. Leave them as-is unless you are also updating
+// the Electron protocol handler and your auth provider's redirect URIs.
 const VALID_CHANNELS = new Set(["development", "staging", "production"]);
 const DEFAULT_OAUTH_PROTOCOL_BY_CHANNEL = {
   development: "openwhispr-dev",
@@ -40,11 +46,12 @@ const OAUTH_PROTOCOL = (import.meta.env.VITE_OPENWHISPR_PROTOCOL || defaultOAuth
   .trim()
   .toLowerCase();
 const OAUTH_AUTH_BRIDGE_URL = (import.meta.env.VITE_OPENWHISPR_AUTH_BRIDGE_URL || "").trim();
+// ─────────────────────────────────────────────────────────────────────────────
 
 // OAuth callback handler: when the browser redirects back from Google/Neon Auth
 // with a session verifier, redirect to the configured custom protocol so Electron
 // can capture it and complete authentication. This check runs before React
-// mounts — if we detect we're in the system browser with a verifier, we
+// mounts, if we detect we're in the system browser with a verifier, we
 // redirect immediately and skip mounting the app entirely.
 function isOAuthBrowserRedirect() {
   const params = new URLSearchParams(window.location.search);
@@ -70,10 +77,10 @@ function isOAuthBrowserRedirect() {
       window.location.href = `${OAUTH_PROTOCOL}://auth/callback?neon_auth_session_verifier=${encodeURIComponent(verifier)}`;
     }, 2000);
 
-    // Show an ultra-premium branded message while waiting
+    // Show branded loading message while waiting for the protocol redirect
     document.body.innerHTML = `
       <style>
-        /* Design tokens from index.css — single source of truth */
+        /* Design tokens */
         :root {
           --bg: #ffffff;
           --surface-1: #fafafa;
@@ -102,11 +109,7 @@ function isOAuthBrowserRedirect() {
           }
         }
 
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
           background: var(--bg);
@@ -125,7 +128,6 @@ function isOAuthBrowserRedirect() {
           padding: 20px;
         }
 
-        /* Premium glass card — native macOS feel */
         .auth-card {
           display: flex;
           flex-direction: column;
@@ -147,11 +149,7 @@ function isOAuthBrowserRedirect() {
           }
         }
 
-        /* Logo container with refined drop shadow */
-        .logo-wrapper {
-          position: relative;
-          margin-bottom: 4px;
-        }
+        .logo-wrapper { position: relative; margin-bottom: 4px; }
 
         .logo {
           display: block;
@@ -159,17 +157,10 @@ function isOAuthBrowserRedirect() {
         }
 
         @media (prefers-color-scheme: dark) {
-          .logo {
-            filter: drop-shadow(0 2px 12px rgba(100, 149, 237, 0.25));
-          }
+          .logo { filter: drop-shadow(0 2px 12px rgba(100, 149, 237, 0.25)); }
         }
 
-        /* Premium spinner with metallic feel */
-        .spinner-wrapper {
-          position: relative;
-          width: 28px;
-          height: 28px;
-        }
+        .spinner-wrapper { position: relative; width: 28px; height: 28px; }
 
         .spinner {
           width: 28px;
@@ -180,11 +171,7 @@ function isOAuthBrowserRedirect() {
           animation: spinner-rotate 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         }
 
-        /* Tight, minimal text hierarchy */
-        .content {
-          text-align: center;
-          line-height: 1.4;
-        }
+        .content { text-align: center; line-height: 1.4; }
 
         h1 {
           font-size: 15px;
@@ -201,48 +188,32 @@ function isOAuthBrowserRedirect() {
           opacity: 0.8;
         }
 
-        /* Smooth animations */
         @keyframes fade-in {
-          from {
-            opacity: 0;
-            transform: translateY(4px) scale(0.98);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
+          from { opacity: 0; transform: translateY(4px) scale(0.98); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         @keyframes spinner-rotate {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
         }
 
-        /* Accessibility — respect reduced motion */
         @media (prefers-reduced-motion: reduce) {
-          .auth-card {
-            animation: fade-in-simple 200ms ease-out;
-          }
-          @keyframes fade-in-simple {
-            from { opacity: 0; }
-            to { opacity: 1; }
-          }
-          .spinner {
-            animation: none;
-            border-top-color: var(--text-muted);
-            opacity: 0.5;
-          }
+          .auth-card { animation: fade-in-simple 200ms ease-out; }
+          @keyframes fade-in-simple { from { opacity: 0; } to { opacity: 1; } }
+          .spinner { animation: none; border-top-color: var(--text-muted); opacity: 0.5; }
         }
       </style>
 
       <div id="oauth-container" role="status" aria-live="polite">
         <div class="auth-card">
           <div class="logo-wrapper">
-            <svg class="logo" viewBox="0 0 1024 1024" width="64" height="64" aria-label="OpenWhispr">
+            <!--
+              AKASHML: Replace the SVG below with your own app logo when you
+              have one. Until then the neutral microphone icon is used as a
+              placeholder — it carries no OpenWhispr branding.
+            -->
+            <svg class="logo" viewBox="0 0 1024 1024" width="64" height="64" aria-label="Akash ML">
               <rect width="1024" height="1024" rx="241" fill="#2056DF"/>
               <circle cx="512" cy="512" r="314" fill="#2056DF" stroke="white" stroke-width="74"/>
               <path d="M512 383V641" stroke="white" stroke-width="74" stroke-linecap="round"/>
@@ -428,10 +399,13 @@ function LoadingFallback({ message }) {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">
       <div className="flex flex-col items-center gap-4 animate-[scale-in_300ms_ease-out]">
+        {/*
+          AKASHML Logo
+        */}
         <svg
           viewBox="0 0 1024 1024"
           className="w-12 h-12 drop-shadow-[0_2px_8px_rgba(37,99,235,0.18)] dark:drop-shadow-[0_2px_12px_rgba(100,149,237,0.25)]"
-          aria-label="OpenWhispr"
+          aria-label="Akash ML"
         >
           <rect width="1024" height="1024" rx="241" fill="#2056DF" />
           <circle cx="512" cy="512" r="314" fill="#2056DF" stroke="white" strokeWidth="74" />

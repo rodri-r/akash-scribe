@@ -79,6 +79,10 @@ import { startMigration, useMigration } from "../stores/noteStore.js";
 import { formatBytes } from "../utils/formatBytes";
 import { useSettingsStore } from "../stores/settingsStore";
 
+// ─── AkashML default endpoint ────────────────────────────────────────────────
+const AKASH_ML_BASE_URL = "https://chatapi.akash.network/api/v1";
+// ─────────────────────────────────────────────────────────────────────────────
+
 const formatAmount = (cents: number, currency: string) =>
   (cents / 100).toLocaleString(undefined, { style: "currency", currency });
 
@@ -215,8 +219,28 @@ function TranscriptionSection({
   toast,
 }: TranscriptionSectionProps) {
   const { t } = useTranslation();
-  const isCustomMode = cloudTranscriptionMode === "byok" || useLocalWhisper;
-  const isCloudMode = isSignedIn && cloudTranscriptionMode === "openwhispr" && !useLocalWhisper;
+
+  // AKASHML: "OpenWhispr Cloud" mode is hidden. Our app always uses BYOK/custom.
+  // The mode selector panel below is commented out so signed-in users no longer
+  // see the Cloud vs Custom Setup toggle. The underlying state variables are kept
+  //
+  //
+  // To restore the mode selector, remove the comment block below and delete the
+  // forced-BYOK useEffect. Search "AKASHML_HIDDEN_CLOUD_MODE" to find all sites.
+
+  // AKASHML_HIDDEN_CLOUD_MODE forces BYOK on mount so stored "openwhispr" values
+  // are silently corrected without user action.
+  useEffect(() => {
+    if (cloudTranscriptionMode !== "byok") {
+      setCloudTranscriptionMode("byok");
+    }
+    if (cloudTranscriptionProvider !== "custom") {
+      setCloudTranscriptionProvider("custom");
+    }
+    if (!cloudTranscriptionBaseUrl || cloudTranscriptionBaseUrl.trim() === "") {
+      setCloudTranscriptionBaseUrl(AKASH_ML_BASE_URL);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="space-y-4">
@@ -225,172 +249,94 @@ function TranscriptionSection({
         description={t("settingsPage.transcription.description")}
       />
 
-      {/* Mode selector */}
-      {isSignedIn && (
-        <SettingsPanel>
-          <SettingsPanelRow>
-            <button
-              onClick={() => {
-                if (!isCloudMode) {
-                  setCloudTranscriptionMode("openwhispr");
-                  setUseLocalWhisper(false);
-                  updateTranscriptionSettings({ useLocalWhisper: false });
-                  toast({
-                    title: t("settingsPage.transcription.toasts.switchedCloud.title"),
-                    description: t("settingsPage.transcription.toasts.switchedCloud.description"),
-                    variant: "success",
-                    duration: 3000,
-                  });
-                }
-              }}
-              className="w-full flex items-center gap-3 text-left cursor-pointer group"
-            >
-              <div
-                className={`w-8 h-8 rounded-md flex items-center justify-center shrink-0 transition-colors ${
-                  isCloudMode
-                    ? "bg-primary/10 dark:bg-primary/15"
-                    : "bg-muted/60 dark:bg-surface-raised group-hover:bg-muted dark:group-hover:bg-surface-3"
-                }`}
-              >
-                <Cloud
-                  className={`w-4 h-4 transition-colors ${
-                    isCloudMode ? "text-primary" : "text-muted-foreground"
-                  }`}
-                />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium text-foreground">
-                    {t("settingsPage.transcription.openwhisprCloud")}
-                  </span>
-                  {isCloudMode && (
-                    <span className="text-xs font-medium text-primary bg-primary/10 dark:bg-primary/15 px-1.5 py-px rounded-sm">
-                      {t("common.active")}
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground/80 mt-0.5">
-                  {t("settingsPage.transcription.openwhisprCloudDescription")}
-                </p>
-              </div>
-              <div
-                className={`w-4 h-4 rounded-full border-2 shrink-0 transition-colors ${
-                  isCloudMode
-                    ? "border-primary bg-primary"
-                    : "border-border-hover dark:border-border-subtle"
-                }`}
-              >
-                {isCloudMode && (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />
-                  </div>
-                )}
-              </div>
-            </button>
-          </SettingsPanelRow>
-          <SettingsPanelRow>
-            <button
-              onClick={() => {
-                if (!isCustomMode) {
-                  setCloudTranscriptionMode("byok");
-                  setUseLocalWhisper(false);
-                  updateTranscriptionSettings({ useLocalWhisper: false });
-                  toast({
-                    title: t("settingsPage.transcription.toasts.switchedCustom.title"),
-                    description: t("settingsPage.transcription.toasts.switchedCustom.description"),
-                    variant: "success",
-                    duration: 3000,
-                  });
-                }
-              }}
-              className="w-full flex items-center gap-3 text-left cursor-pointer group"
-            >
-              <div
-                className={`w-8 h-8 rounded-md flex items-center justify-center shrink-0 transition-colors ${
-                  isCustomMode
-                    ? "bg-accent/10 dark:bg-accent/15"
-                    : "bg-muted/60 dark:bg-surface-raised group-hover:bg-muted dark:group-hover:bg-surface-3"
-                }`}
-              >
-                <Key
-                  className={`w-4 h-4 transition-colors ${
-                    isCustomMode ? "text-accent" : "text-muted-foreground"
-                  }`}
-                />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium text-foreground">
-                    {t("settingsPage.transcription.customSetup")}
-                  </span>
-                  {isCustomMode && (
-                    <span className="text-xs font-medium text-accent bg-accent/10 dark:bg-accent/15 px-1.5 py-px rounded-sm">
-                      {t("common.active")}
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground/80 mt-0.5">
-                  {t("settingsPage.transcription.customSetupDescription")}
-                </p>
-              </div>
-              <div
-                className={`w-4 h-4 rounded-full border-2 shrink-0 transition-colors ${
-                  isCustomMode
-                    ? "border-accent bg-accent"
-                    : "border-border-hover dark:border-border-subtle"
-                }`}
-              >
-                {isCustomMode && (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <div className="w-1.5 h-1.5 rounded-full bg-accent-foreground" />
-                  </div>
-                )}
-              </div>
-            </button>
-          </SettingsPanelRow>
-        </SettingsPanel>
-      )}
+      {/*
+        AKASHML_HIDDEN_CLOUD_MODE is original Cloud vs Custom Setup mode selector.
+        Uncomment this entire block to restore it when re-enabling other providers.
 
-      {/* Custom Setup model picker — shown when Custom Setup is active or not signed in */}
-      {(isCustomMode || !isSignedIn) && (
-        <TranscriptionModelPicker
-          selectedCloudProvider={cloudTranscriptionProvider}
-          onCloudProviderSelect={setCloudTranscriptionProvider}
-          selectedCloudModel={cloudTranscriptionModel}
-          onCloudModelSelect={setCloudTranscriptionModel}
-          selectedLocalModel={
-            localTranscriptionProvider === "nvidia" ? parakeetModel : whisperModel
+        {isSignedIn && (
+          <SettingsPanel>
+            <SettingsPanelRow>
+              <button
+                onClick={() => {
+                  if (cloudTranscriptionMode !== "openwhispr") {
+                    setCloudTranscriptionMode("openwhispr");
+                    setUseLocalWhisper(false);
+                    updateTranscriptionSettings({ useLocalWhisper: false });
+                    toast({
+                      title: t("settingsPage.transcription.toasts.switchedCloud.title"),
+                      description: t("settingsPage.transcription.toasts.switchedCloud.description"),
+                      variant: "success",
+                      duration: 3000,
+                    });
+                  }
+                }}
+                className="w-full flex items-center gap-3 text-left cursor-pointer group"
+              >
+                ... OpenWhispr Cloud button ...
+              </button>
+            </SettingsPanelRow>
+            <SettingsPanelRow>
+              <button
+                onClick={() => {
+                  if (cloudTranscriptionMode !== "byok") {
+                    setCloudTranscriptionMode("byok");
+                    setUseLocalWhisper(false);
+                    updateTranscriptionSettings({ useLocalWhisper: false });
+                    toast({
+                      title: t("settingsPage.transcription.toasts.switchedCustom.title"),
+                      description: t("settingsPage.transcription.toasts.switchedCustom.description"),
+                      variant: "success",
+                      duration: 3000,
+                    });
+                  }
+                }}
+                className="w-full flex items-center gap-3 text-left cursor-pointer group"
+              >
+                ... Custom Setup button ...
+              </button>
+            </SettingsPanelRow>
+          </SettingsPanel>
+        )}
+      */}
+
+      {/* Model picker always shown (BYOK/custom is the only mode) */}
+      <TranscriptionModelPicker
+        selectedCloudProvider={cloudTranscriptionProvider}
+        onCloudProviderSelect={setCloudTranscriptionProvider}
+        selectedCloudModel={cloudTranscriptionModel}
+        onCloudModelSelect={setCloudTranscriptionModel}
+        selectedLocalModel={
+          localTranscriptionProvider === "nvidia" ? parakeetModel : whisperModel
+        }
+        onLocalModelSelect={(modelId) => {
+          if (localTranscriptionProvider === "nvidia") {
+            setParakeetModel(modelId);
+          } else {
+            setWhisperModel(modelId);
           }
-          onLocalModelSelect={(modelId) => {
-            if (localTranscriptionProvider === "nvidia") {
-              setParakeetModel(modelId);
-            } else {
-              setWhisperModel(modelId);
-            }
-          }}
-          selectedLocalProvider={localTranscriptionProvider}
-          onLocalProviderSelect={setLocalTranscriptionProvider}
-          useLocalWhisper={useLocalWhisper}
-          onModeChange={(isLocal) => {
-            setUseLocalWhisper(isLocal);
-            updateTranscriptionSettings({ useLocalWhisper: isLocal });
-            if (isLocal) {
-              setCloudTranscriptionMode("byok");
-            }
-          }}
-          openaiApiKey={openaiApiKey}
-          setOpenaiApiKey={setOpenaiApiKey}
-          groqApiKey={groqApiKey}
-          setGroqApiKey={setGroqApiKey}
-          mistralApiKey={mistralApiKey}
-          setMistralApiKey={setMistralApiKey}
-          customTranscriptionApiKey={customTranscriptionApiKey}
-          setCustomTranscriptionApiKey={setCustomTranscriptionApiKey}
-          cloudTranscriptionBaseUrl={cloudTranscriptionBaseUrl}
-          setCloudTranscriptionBaseUrl={setCloudTranscriptionBaseUrl}
-          variant="settings"
-        />
-      )}
+        }}
+        selectedLocalProvider={localTranscriptionProvider}
+        onLocalProviderSelect={setLocalTranscriptionProvider}
+        useLocalWhisper={useLocalWhisper}
+        onModeChange={(isLocal) => {
+          setUseLocalWhisper(isLocal);
+          updateTranscriptionSettings({ useLocalWhisper: isLocal });
+          if (isLocal) {
+            setCloudTranscriptionMode("byok");
+          }
+        }}
+        openaiApiKey={openaiApiKey}
+        setOpenaiApiKey={setOpenaiApiKey}
+        groqApiKey={groqApiKey}
+        setGroqApiKey={setGroqApiKey}
+        mistralApiKey={mistralApiKey}
+        setMistralApiKey={setMistralApiKey}
+        customTranscriptionApiKey={customTranscriptionApiKey}
+        setCustomTranscriptionApiKey={setCustomTranscriptionApiKey}
+        cloudTranscriptionBaseUrl={cloudTranscriptionBaseUrl || AKASH_ML_BASE_URL}
+        setCloudTranscriptionBaseUrl={setCloudTranscriptionBaseUrl}
+        variant="settings"
+      />
     </div>
   );
 }
@@ -450,8 +396,18 @@ function AiModelsSection({
   toast,
 }: AiModelsSectionProps) {
   const { t } = useTranslation();
-  const isCustomMode = cloudReasoningMode === "byok";
-  const isCloudMode = isSignedIn && cloudReasoningMode === "openwhispr";
+
+  // AKASHML_HIDDEN_CLOUD_MODE forces BYOK for reasoning too, same rationale as
+  // TranscriptionSection above. Restore by removing this useEffect and
+  // uncommenting the mode selector block further below.
+  useEffect(() => {
+    if (cloudReasoningMode !== "byok") {
+      setCloudReasoningMode("byok");
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // With the cloud mode selector hidden, we always treat this as custom/BYOK.
+  const isCustomMode = true;
 
   return (
     <div className="space-y-4">
@@ -474,131 +430,24 @@ function AiModelsSection({
 
       {useReasoningModel && (
         <>
-          {/* Mode selector */}
-          {isSignedIn && (
-            <SettingsPanel>
-              <SettingsPanelRow>
-                <button
-                  onClick={() => {
-                    if (!isCloudMode) {
-                      setCloudReasoningMode("openwhispr");
-                      window.electronAPI?.llamaServerStop?.();
-                      toast({
-                        title: t("settingsPage.aiModels.toasts.switchedCloud.title"),
-                        description: t("settingsPage.aiModels.toasts.switchedCloud.description"),
-                        variant: "success",
-                        duration: 3000,
-                      });
-                    }
-                  }}
-                  className="w-full flex items-center gap-3 text-left cursor-pointer group"
-                >
-                  <div
-                    className={`w-8 h-8 rounded-md flex items-center justify-center shrink-0 transition-colors ${
-                      isCloudMode
-                        ? "bg-primary/10 dark:bg-primary/15"
-                        : "bg-muted/60 dark:bg-surface-raised group-hover:bg-muted dark:group-hover:bg-surface-3"
-                    }`}
-                  >
-                    <Cloud
-                      className={`w-4 h-4 transition-colors ${
-                        isCloudMode ? "text-primary" : "text-muted-foreground"
-                      }`}
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium text-foreground">
-                        {t("settingsPage.aiModels.openwhisprCloud")}
-                      </span>
-                      {isCloudMode && (
-                        <span className="text-xs font-medium text-primary bg-primary/10 dark:bg-primary/15 px-1.5 py-px rounded-sm">
-                          {t("common.active")}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground/80 mt-0.5">
-                      {t("settingsPage.aiModels.openwhisprCloudDescription")}
-                    </p>
-                  </div>
-                  <div
-                    className={`w-4 h-4 rounded-full border-2 shrink-0 transition-colors ${
-                      isCloudMode
-                        ? "border-primary bg-primary"
-                        : "border-border-hover dark:border-border-subtle"
-                    }`}
-                  >
-                    {isCloudMode && (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <div className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />
-                      </div>
-                    )}
-                  </div>
-                </button>
-              </SettingsPanelRow>
-              <SettingsPanelRow>
-                <button
-                  onClick={() => {
-                    if (!isCustomMode) {
-                      setCloudReasoningMode("byok");
-                      toast({
-                        title: t("settingsPage.aiModels.toasts.switchedCustom.title"),
-                        description: t("settingsPage.aiModels.toasts.switchedCustom.description"),
-                        variant: "success",
-                        duration: 3000,
-                      });
-                    }
-                  }}
-                  className="w-full flex items-center gap-3 text-left cursor-pointer group"
-                >
-                  <div
-                    className={`w-8 h-8 rounded-md flex items-center justify-center shrink-0 transition-colors ${
-                      isCustomMode
-                        ? "bg-accent/10 dark:bg-accent/15"
-                        : "bg-muted/60 dark:bg-surface-raised group-hover:bg-muted dark:group-hover:bg-surface-3"
-                    }`}
-                  >
-                    <Key
-                      className={`w-4 h-4 transition-colors ${
-                        isCustomMode ? "text-accent" : "text-muted-foreground"
-                      }`}
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium text-foreground">
-                        {t("settingsPage.aiModels.customSetup")}
-                      </span>
-                      {isCustomMode && (
-                        <span className="text-xs font-medium text-accent bg-accent/10 dark:bg-accent/15 px-1.5 py-px rounded-sm">
-                          {t("common.active")}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground/80 mt-0.5">
-                      {t("settingsPage.aiModels.customSetupDescription")}
-                    </p>
-                  </div>
-                  <div
-                    className={`w-4 h-4 rounded-full border-2 shrink-0 transition-colors ${
-                      isCustomMode
-                        ? "border-accent bg-accent"
-                        : "border-border-hover dark:border-border-subtle"
-                    }`}
-                  >
-                    {isCustomMode && (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <div className="w-1.5 h-1.5 rounded-full bg-accent-foreground" />
-                      </div>
-                    )}
-                  </div>
-                </button>
-              </SettingsPanelRow>
-            </SettingsPanel>
-          )}
+          {/*
+            AKASHML_HIDDEN_CLOUD_MODE — original Cloud vs Custom Setup mode selector
+            for AI/Reasoning. Uncomment to restore when re-enabling other providers.
 
-          {/* Custom Setup model picker — shown when Custom Setup is active or not signed in */}
-          {(isCustomMode || !isSignedIn) && (
+            {isSignedIn && (
+              <SettingsPanel>
+                <SettingsPanelRow>
+                  ... OpenWhispr Cloud reasoning button ...
+                </SettingsPanelRow>
+                <SettingsPanelRow>
+                  ... Custom Setup reasoning button ...
+                </SettingsPanelRow>
+              </SettingsPanel>
+            )}
+          */}
+
+          {/* Custom Setup model picker — always shown */}
+          {isCustomMode && (
             <ReasoningModelSelector
               reasoningModel={reasoningModel}
               setReasoningModel={setReasoningModel}
@@ -1570,12 +1419,17 @@ export default function SettingsPage({ activeSection = "general" }: SettingsPage
                         </li>
                       ))}
                     </ul>
+                    {/*
+                      AKASHML: Support link.
+                    */}
                     <Button
                       variant="outline"
                       size="sm"
                       className="mt-2 w-full h-6 text-[10px]"
                       onClick={() =>
-                        window.electronAPI?.openExternal?.("https://openwhispr.com/contact-sales")
+                        window.electronAPI?.openExternal?.(
+                          "https://akash.network/support/"
+                        )
                       }
                     >
                       <Mail size={10} />
@@ -2287,9 +2141,7 @@ export default function SettingsPage({ activeSection = "general" }: SettingsPage
                               {
                                 title: t(
                                   "settingsPage.general.waylandPaste.guide.uinput.ruleFoundTitle",
-                                  {
-                                    defaultValue: "udev rule already configured",
-                                  }
+                                  { defaultValue: "udev rule already configured" }
                                 ),
                                 desc: t(
                                   "settingsPage.general.waylandPaste.guide.uinput.ruleFoundDesc",
@@ -2307,9 +2159,7 @@ export default function SettingsPage({ activeSection = "general" }: SettingsPage
                               {
                                 title: t(
                                   "settingsPage.general.waylandPaste.guide.uinput.rebootTitle",
-                                  {
-                                    defaultValue: "If reloading didn't help, reboot",
-                                  }
+                                  { defaultValue: "If reloading didn't help, reboot" }
                                 ),
                                 desc: t(
                                   "settingsPage.general.waylandPaste.guide.uinput.rebootDesc",
@@ -2324,9 +2174,7 @@ export default function SettingsPage({ activeSection = "general" }: SettingsPage
                               {
                                 title: t(
                                   "settingsPage.general.waylandPaste.guide.uinput.step1Title",
-                                  {
-                                    defaultValue: "Create a udev rule",
-                                  }
+                                  { defaultValue: "Create a udev rule" }
                                 ),
                                 desc: t(
                                   "settingsPage.general.waylandPaste.guide.uinput.step1Desc",
@@ -2344,15 +2192,11 @@ export default function SettingsPage({ activeSection = "general" }: SettingsPage
                               {
                                 title: t(
                                   "settingsPage.general.waylandPaste.guide.uinput.step2Title",
-                                  {
-                                    defaultValue: "Reload udev rules",
-                                  }
+                                  { defaultValue: "Reload udev rules" }
                                 ),
                                 desc: t(
                                   "settingsPage.general.waylandPaste.guide.uinput.step2Desc",
-                                  {
-                                    defaultValue: "Apply the new rule without rebooting.",
-                                  }
+                                  { defaultValue: "Apply the new rule without rebooting." }
                                 ),
                                 cmds: [
                                   {
@@ -2384,7 +2228,7 @@ export default function SettingsPage({ activeSection = "general" }: SettingsPage
                           }),
                           desc: t("settingsPage.general.waylandPaste.guide.group.step2Desc", {
                             defaultValue:
-                              "Group changes only take effect after a new login session. Log out of your desktop and log back in, then reopen OpenWhispr.",
+                              "Group changes only take effect after a new login session. Log out of your desktop and log back in, then reopen the app.",
                           }),
                         },
                       ],
@@ -2554,7 +2398,6 @@ EOF`,
                         </>
                       )}
 
-                      {/* Step-by-step guide dialog */}
                       <Dialog
                         open={!!activeGuide}
                         onOpenChange={(open) => !open && setYdotoolGuideKey(null)}
@@ -2633,7 +2476,6 @@ EOF`,
       case "hotkeys":
         return (
           <div className="space-y-6">
-            {/* Dictation Hotkey */}
             <div>
               <SectionHeader
                 title={t("settingsPage.general.hotkey.title")}
@@ -2747,7 +2589,6 @@ EOF`,
               description={t("settingsPage.agentConfig.description")}
             />
 
-            {/* Agent Name */}
             <div>
               <p className="text-[13px] font-medium text-foreground mb-3">
                 {t("settingsPage.agentConfig.agentName")}
@@ -2778,7 +2619,6 @@ EOF`,
               </SettingsPanel>
             </div>
 
-            {/* How it works */}
             <div>
               <SectionHeader title={t("settingsPage.agentConfig.howItWorksTitle")} />
               <SettingsPanel>
@@ -2790,7 +2630,6 @@ EOF`,
               </SettingsPanel>
             </div>
 
-            {/* Examples */}
             <div>
               <SectionHeader title={t("settingsPage.agentConfig.examplesTitle")} />
               <SettingsPanel>
@@ -2843,7 +2682,6 @@ EOF`,
               title={t("settingsPage.prompts.title")}
               description={t("settingsPage.prompts.description")}
             />
-
             <PromptStudio />
           </div>
         );
@@ -2851,7 +2689,6 @@ EOF`,
       case "intelligence":
         return (
           <div className="space-y-6">
-            {/* Text Cleanup (AI Models) */}
             <AiModelsSection
               isSignedIn={isSignedIn ?? false}
               cloudReasoningMode={cloudReasoningMode}
@@ -2879,7 +2716,6 @@ EOF`,
               toast={toast}
             />
 
-            {/* Agent Config */}
             <div className="border-t border-border/40 pt-6">
               <SectionHeader
                 title={t("settingsPage.agentConfig.title")}
@@ -2979,7 +2815,6 @@ EOF`,
               </div>
             </div>
 
-            {/* System Prompt */}
             <div className="border-t border-border/40 pt-6">
               <SectionHeader
                 title={t("settingsPage.prompts.title")}
@@ -2993,7 +2828,6 @@ EOF`,
       case "privacyData":
         return (
           <div className="space-y-6">
-            {/* Privacy */}
             <div>
               <SectionHeader
                 title={t("settingsPage.privacy.title")}
@@ -3058,7 +2892,6 @@ EOF`,
               </SettingsPanel>
             </div>
 
-            {/* Audio Retention */}
             <div className="border-t border-border/40 pt-6">
               <SectionHeader
                 title={t("settingsPage.privacy.audioRetention")}
@@ -3121,7 +2954,6 @@ EOF`,
               </SettingsPanel>
             </div>
 
-            {/* Permissions */}
             <div className="border-t border-border/40 pt-6">
               <SectionHeader
                 title={t("settingsPage.permissions.title")}
@@ -3215,7 +3047,6 @@ EOF`,
       case "system":
         return (
           <div className="space-y-6">
-            {/* Software Updates */}
             <div>
               <SectionHeader title={t("settingsPage.general.updates.title")} />
               <SettingsPanel>
@@ -3381,12 +3212,10 @@ EOF`,
               </SettingsPanel>
             </div>
 
-            {/* Developer Tools */}
             <div className="border-t border-border/40 pt-6">
               <DeveloperSection />
             </div>
 
-            {/* Data Management */}
             <div className="border-t border-border/40 pt-6">
               <SectionHeader
                 title={t("settingsPage.developer.dataManagementTitle")}

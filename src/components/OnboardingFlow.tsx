@@ -42,6 +42,11 @@ import logger from "../utils/logger";
 import { ActivationModeSelector } from "./ui/ActivationModeSelector";
 import TranscriptionModelPicker from "./TranscriptionModelPicker";
 
+// ─── AkashML default endpoint ────────────────────────────────────────────────
+// Change this URL if your AkashML deployment endpoint changes.
+const AKASH_ML_BASE_URL = "https://chatapi.akash.network/api/v1";
+// ─────────────────────────────────────────────────────────────────────────────
+
 interface OnboardingFlowProps {
   onComplete: () => void;
 }
@@ -183,6 +188,21 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
     checkStatus();
   }, [useLocalWhisper, whisperModel, parakeetModel, localTranscriptionProvider]);
+
+  // ─── Force "custom" provider + AkashML URL on first cloud-mode render ──────
+  // This ensures the app always defaults to the AkashML endpoint rather than
+  // prompting the user to choose a provider. The other providers (openai, groq,
+  // mistral, openwhispr-cloud) are intentionally hidden for this fork but their
+  // code remains in TranscriptionModelPicker so they can be re-enabled later.
+  useEffect(() => {
+    if (!useLocalWhisper && cloudTranscriptionProvider !== "custom") {
+      updateTranscriptionSettings({ cloudTranscriptionProvider: "custom" });
+    }
+    if (!cloudTranscriptionBaseUrl || cloudTranscriptionBaseUrl.trim() === "") {
+      updateTranscriptionSettings({ cloudTranscriptionBaseUrl: AKASH_ML_BASE_URL });
+    }
+  }, [useLocalWhisper, cloudTranscriptionProvider, cloudTranscriptionBaseUrl, updateTranscriptionSettings]);
+  // ─────────────────────────────────────────────────────────────────────────────
 
   // Auto-register default hotkey when entering the activation step
   // (step 3 for non-signed-in, step 2 for signed-in users)
@@ -451,7 +471,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           );
         }
 
-        // Not signed in — full setup (unchanged)
+        // Not signed in — full setup
         return (
           <div className="space-y-3">
             <div className="text-center space-y-0.5">
@@ -463,7 +483,13 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               </p>
             </div>
 
-            {/* Unified configuration with integrated mode toggle */}
+            {/*
+              TranscriptionModelPicker receives the forced "custom" provider and
+              AkashML base URL. The other providers (openai, groq, mistral,
+              openwhispr-cloud) are commented out inside TranscriptionModelPicker
+              itself — search for "AKASHML_HIDDEN_PROVIDERS" in that file to
+              re-enable them later if needed.
+            */}
             <TranscriptionModelPicker
               selectedCloudProvider={cloudTranscriptionProvider}
               onCloudProviderSelect={(provider) =>
@@ -504,7 +530,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               setMistralApiKey={setMistralApiKey}
               customTranscriptionApiKey={customTranscriptionApiKey}
               setCustomTranscriptionApiKey={setCustomTranscriptionApiKey}
-              cloudTranscriptionBaseUrl={cloudTranscriptionBaseUrl}
+              cloudTranscriptionBaseUrl={cloudTranscriptionBaseUrl || AKASH_ML_BASE_URL}
               setCloudTranscriptionBaseUrl={(url) =>
                 updateTranscriptionSettings({ cloudTranscriptionBaseUrl: url })
               }
@@ -718,18 +744,23 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             localTranscriptionProvider === "nvidia" ? parakeetModel : whisperModel;
           return modelToCheck !== "" && isModelDownloaded;
         } else {
-          // For cloud mode, check if appropriate API key is set
-          if (cloudTranscriptionProvider === "openai") {
-            return openaiApiKey.trim().length > 0;
-          } else if (cloudTranscriptionProvider === "groq") {
-            return groqApiKey.trim().length > 0;
-          } else if (cloudTranscriptionProvider === "mistral") {
-            return mistralApiKey.trim().length > 0;
-          } else if (cloudTranscriptionProvider === "custom") {
-            // Custom can work without API key for local endpoints
-            return true;
-          }
-          return openaiApiKey.trim().length > 0; // Default to OpenAI
+          // Only show Akash ML provider.
+          // The original per-provider checks are preserved below as comments
+          // so they can be restored if other providers are re-enabled later.
+          // Search for "AKASHML_HIDDEN_PROVIDERS" to find the matching block
+          // in TranscriptionModelPicker.tsx.
+          //
+          // if (cloudTranscriptionProvider === "openai") {
+          //   return openaiApiKey.trim().length > 0;
+          // } else if (cloudTranscriptionProvider === "groq") {
+          //   return groqApiKey.trim().length > 0;
+          // } else if (cloudTranscriptionProvider === "mistral") {
+          //   return mistralApiKey.trim().length > 0;
+          // } else if (cloudTranscriptionProvider === "custom") {
+          //   return true; // Custom can work without API key for local endpoints
+          // }
+          // return openaiApiKey.trim().length > 0; // Default to OpenAI
+          return true; // AkashML custom endpoint — no key required to proceed
         }
       case 2: {
         // For signed-in users, this is activation step

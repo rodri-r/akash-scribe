@@ -17,6 +17,20 @@ import type {
   AgentModeSettings,
 } from "../hooks/useSettings";
 
+// ─── AkashML defaults ────────────────────────────────────────────────────────
+// These constants are the single source of truth for the store-level defaults.
+// All other files reference AKASH_ML_BASE_URL from their own copy of this
+// constant, keep them in sync if you ever change the endpoint.
+//
+// AKASHML_HIDDEN_PROVIDERS: to restore multi-provider support, revert the
+// four defaults marked below back to their original values:
+//   cloudTranscriptionProvider : "openai"
+//   cloudTranscriptionBaseUrl  : API_ENDPOINTS.TRANSCRIPTION_BASE
+//   cloudTranscriptionMode     : hasStoredByokKey() ? "byok" : "openwhispr"
+//   cloudReasoningMode         : "openwhispr"
+const AKASH_ML_BASE_URL = "https://chatapi.akash.network/api/v1";
+// ─────────────────────────────────────────────────────────────────────────────
+
 let _ReasoningService: typeof import("../services/ReasoningService").default | null = null;
 
 const isBrowser = typeof window !== "undefined";
@@ -45,6 +59,34 @@ function readStringArray(key: string, fallback: string[]): string[] {
     return fallback;
   }
 }
+
+// ─── AkashML: readStringAkash ─────────────────────────────────────────────────
+// Like readString, but additionally maps any stored value that was set by the
+// old OpenWhispr branding to the new AkashML default. This means returning
+// users whose localStorage still has "openai" / "openwhispr" stored will
+// silently get the correct value on first read before any React component
+// even mounts, and before the useSettings correction layer fires.
+//
+// AKASHML_HIDDEN_PROVIDERS: remove this function and replace its call sites
+// with plain readString() calls to restore the original behaviour.
+function readStringAkash(
+  key: string,
+  fallback: string,
+  legacyValues: string[]
+): string {
+  if (!isBrowser) return fallback;
+  const stored = localStorage.getItem(key);
+  if (stored === null) return fallback;
+  // If the stored value is one of the old provider values, treat it as absent
+  // and return the AkashML default instead. Also write it back so subsequent
+  // reads are instant (no migration loop needed).
+  if (legacyValues.includes(stored)) {
+    localStorage.setItem(key, fallback);
+    return fallback;
+  }
+  return stored;
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 const BOOLEAN_SETTINGS = new Set([
   "useLocalWhisper",
@@ -228,17 +270,60 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
   allowLocalFallback: readBoolean("allowLocalFallback", false),
   fallbackWhisperModel: readString("fallbackWhisperModel", "base"),
   preferredLanguage: readString("preferredLanguage", "auto"),
-  cloudTranscriptionProvider: readString("cloudTranscriptionProvider", "openai"),
-  cloudTranscriptionModel: readString("cloudTranscriptionModel", "gpt-4o-mini-transcribe"),
-  cloudTranscriptionBaseUrl: readString(
+
+  // AKASHML: was readString("cloudTranscriptionProvider", "openai")
+  // readStringAkash maps any stored "openai" / "groq" / "mistral" / "openwhispr-cloud"
+  // value back to "custom" at the earliest possible read point.
+  // AKASHML_HIDDEN_PROVIDERS: revert to:
+  //   cloudTranscriptionProvider: readString("cloudTranscriptionProvider", "openai"),
+  cloudTranscriptionProvider: readStringAkash(
+    "cloudTranscriptionProvider",
+    "custom",
+    ["openai", "groq", "mistral", "openwhispr-cloud"]
+  ),
+
+  // AKASHML: was readString("cloudTranscriptionModel", "gpt-4o-mini-transcribe")
+  // We keep "whisper-1" as the default since AkashML exposes an OpenAI-compatible
+  // Whisper endpoint. Stored values pointing to OpenAI-specific model IDs are
+  // migrated to "whisper-1".
+  // AKASHML_HIDDEN_PROVIDERS: revert to:
+  //   cloudTranscriptionModel: readString("cloudTranscriptionModel", "gpt-4o-mini-transcribe"),
+  cloudTranscriptionModel: readStringAkash(
+    "cloudTranscriptionModel",
+    "whisper-1",
+    ["gpt-4o-mini-transcribe", "gpt-4o-transcribe", "whisper-1-turbo"]
+  ),
+
+  // AKASHML: was readString("cloudTranscriptionBaseUrl", API_ENDPOINTS.TRANSCRIPTION_BASE)
+  // readStringAkash maps the old OpenWhispr cloud endpoint back to AkashML.
+  // AKASHML_HIDDEN_PROVIDERS: revert to:
+  //   cloudTranscriptionBaseUrl: readString("cloudTranscriptionBaseUrl", API_ENDPOINTS.TRANSCRIPTION_BASE),
+  cloudTranscriptionBaseUrl: readStringAkash(
     "cloudTranscriptionBaseUrl",
-    API_ENDPOINTS.TRANSCRIPTION_BASE
+    AKASH_ML_BASE_URL,
+    [API_ENDPOINTS.TRANSCRIPTION_BASE, API_ENDPOINTS.OPENAI_BASE, ""]
   ),
-  cloudTranscriptionMode: readString(
+
+  // AKASHML: was readString("cloudTranscriptionMode", hasStoredByokKey() ? "byok" : "openwhispr")
+  // Always "byok" there is no OpenWhispr cloud account in this fork.
+  // AKASHML_HIDDEN_PROVIDERS: revert to:
+  //   cloudTranscriptionMode: readString("cloudTranscriptionMode", hasStoredByokKey() ? "byok" : "openwhispr"),
+  cloudTranscriptionMode: readStringAkash(
     "cloudTranscriptionMode",
-    hasStoredByokKey() ? "byok" : "openwhispr"
+    "byok",
+    ["openwhispr"]
   ),
-  cloudReasoningMode: readString("cloudReasoningMode", "openwhispr"),
+
+  // AKASHML: was readString("cloudReasoningMode", "openwhispr")
+  // Always "byok" for the same reason.
+  // AKASHML_HIDDEN_PROVIDERS: revert to:
+  //   cloudReasoningMode: readString("cloudReasoningMode", "openwhispr"),
+  cloudReasoningMode: readStringAkash(
+    "cloudReasoningMode",
+    "byok",
+    ["openwhispr"]
+  ),
+
   cloudReasoningBaseUrl: readString("cloudReasoningBaseUrl", API_ENDPOINTS.OPENAI_BASE),
   customDictionary: readStringArray("customDictionary", []),
   assemblyAiStreaming: readBoolean("assemblyAiStreaming", true),

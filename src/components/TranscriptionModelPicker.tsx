@@ -29,6 +29,33 @@ import { getCachedPlatform } from "../utils/platform";
 import type { CudaWhisperStatus } from "../types/electron";
 import logger from "../utils/logger";
 
+// ─── AkashML ────────────────────────────────────────────────────────
+// The four original cloud provider tabs (openai, groq, mistral, openwhispr-cloud)
+// are commented out below under the label AKASHML_HIDDEN_PROVIDERS.
+// To restore them later, uncomment CLOUD_PROVIDER_TABS and remove
+// AKASHML_CLOUD_PROVIDER_TABS, then revert the related JSX changes.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// AKASHML_HIDDEN_PROVIDERS — original tabs, kept for future reference:
+// const CLOUD_PROVIDER_TABS = [
+//   { id: "openai", name: "OpenAI" },
+//   { id: "groq", name: "Groq", recommended: true },
+//   { id: "mistral", name: "Mistral" },
+//   { id: "custom", name: "Custom" },
+// ];
+
+// Only the "custom" provider is shown, rebranded as Akash ML.
+const AKASHML_CLOUD_PROVIDER_TABS = [
+  { id: "custom", name: "Akash ML" },
+];
+
+const VALID_CLOUD_PROVIDER_IDS = ["openai", "groq", "mistral", "custom"];
+
+const LOCAL_PROVIDER_TABS: Array<{ id: string; name: string; disabled?: boolean }> = [
+  { id: "whisper", name: "OpenAI Whisper" },
+  { id: "nvidia", name: "NVIDIA Parakeet" },
+];
+
 interface LocalModel {
   model: string;
   size_mb?: number;
@@ -205,20 +232,6 @@ interface TranscriptionModelPickerProps {
   variant?: "onboarding" | "settings";
 }
 
-const CLOUD_PROVIDER_TABS = [
-  { id: "openai", name: "OpenAI" },
-  { id: "groq", name: "Groq", recommended: true },
-  { id: "mistral", name: "Mistral" },
-  { id: "custom", name: "Custom" },
-];
-
-const VALID_CLOUD_PROVIDER_IDS = CLOUD_PROVIDER_TABS.map((p) => p.id);
-
-const LOCAL_PROVIDER_TABS: Array<{ id: string; name: string; disabled?: boolean }> = [
-  { id: "whisper", name: "OpenAI Whisper" },
-  { id: "nvidia", name: "NVIDIA Parakeet" },
-];
-
 interface ModeToggleProps {
   useLocalWhisper: boolean;
   onModeChange: (useLocal: boolean) => void;
@@ -299,6 +312,7 @@ export default function TranscriptionModelPicker({
       setInternalLocalProvider(selectedLocalProvider);
     }
   }, [selectedLocalProvider]);
+
   const isLoadingRef = useRef(false);
   const isLoadingParakeetRef = useRef(false);
   const loadLocalModelsRef = useRef<(() => Promise<void>) | null>(null);
@@ -311,9 +325,14 @@ export default function TranscriptionModelPicker({
   const colorScheme: ColorScheme = variant === "settings" ? "purple" : "blue";
   const styles = useMemo(() => MODEL_PICKER_COLORS[colorScheme], [colorScheme]);
   const cloudProviders = useMemo(() => getTranscriptionProviders(), []);
-  const cloudProviderTabs = CLOUD_PROVIDER_TABS.map((provider) =>
-    provider.id === "custom" ? { ...provider, name: t("transcription.customProvider") } : provider
-  );
+
+  // AKASHML: The tab list is fixed to just "Akash ML" (custom).
+  // The original line was:
+  //   const cloudProviderTabs = CLOUD_PROVIDER_TABS.map((provider) =>
+  //     provider.id === "custom" ? { ...provider, name: t("transcription.customProvider") } : provider
+  //   );
+  // AKASHML_HIDDEN_PROVIDERS restore the line above and remove the one below to re-enable all tabs.
+  const cloudProviderTabs = AKASHML_CLOUD_PROVIDER_TABS;
 
   useEffect(() => {
     selectedLocalModelRef.current = selectedLocalModel;
@@ -372,41 +391,40 @@ export default function TranscriptionModelPicker({
   }, []);
 
   const ensureValidCloudSelection = useCallback(() => {
-    const isValidProvider = VALID_CLOUD_PROVIDER_IDS.includes(selectedCloudProvider);
+    // AKASHML: Always force "custom" provider. No need to detect or fall back
+    // to other providers. The original multi-provider logic is preserved below.
+    //
+    // AKASHML_HIDDEN_PROVIDERS original logic to restore later:
+    // const isValidProvider = VALID_CLOUD_PROVIDER_IDS.includes(selectedCloudProvider);
+    // if (!isValidProvider) {
+    //   const knownProviderUrls = cloudProviders.map((p) => p.baseUrl);
+    //   const hasCustomUrl =
+    //     cloudTranscriptionBaseUrl &&
+    //     cloudTranscriptionBaseUrl.trim() !== "" &&
+    //     cloudTranscriptionBaseUrl !== API_ENDPOINTS.TRANSCRIPTION_BASE &&
+    //     !knownProviderUrls.includes(cloudTranscriptionBaseUrl);
+    //   if (hasCustomUrl) {
+    //     onCloudProviderSelect("custom");
+    //   } else {
+    //     const firstProvider = cloudProviders[0];
+    //     if (firstProvider) {
+    //       onCloudProviderSelect(firstProvider.id);
+    //       if (firstProvider.models?.length) {
+    //         onCloudModelSelect(firstProvider.models[0].id);
+    //       }
+    //     }
+    //   }
+    // } else if (selectedCloudProvider !== "custom" && !selectedCloudModel) {
+    //   const provider = cloudProviders.find((p) => p.id === selectedCloudProvider);
+    //   if (provider?.models?.length) {
+    //     onCloudModelSelect(provider.models[0].id);
+    //   }
+    // }
 
-    if (!isValidProvider) {
-      const knownProviderUrls = cloudProviders.map((p) => p.baseUrl);
-      const hasCustomUrl =
-        cloudTranscriptionBaseUrl &&
-        cloudTranscriptionBaseUrl.trim() !== "" &&
-        cloudTranscriptionBaseUrl !== API_ENDPOINTS.TRANSCRIPTION_BASE &&
-        !knownProviderUrls.includes(cloudTranscriptionBaseUrl);
-
-      if (hasCustomUrl) {
-        onCloudProviderSelect("custom");
-      } else {
-        const firstProvider = cloudProviders[0];
-        if (firstProvider) {
-          onCloudProviderSelect(firstProvider.id);
-          if (firstProvider.models?.length) {
-            onCloudModelSelect(firstProvider.models[0].id);
-          }
-        }
-      }
-    } else if (selectedCloudProvider !== "custom" && !selectedCloudModel) {
-      const provider = cloudProviders.find((p) => p.id === selectedCloudProvider);
-      if (provider?.models?.length) {
-        onCloudModelSelect(provider.models[0].id);
-      }
+    if (selectedCloudProvider !== "custom") {
+      onCloudProviderSelect("custom");
     }
-  }, [
-    cloudProviders,
-    cloudTranscriptionBaseUrl,
-    selectedCloudProvider,
-    selectedCloudModel,
-    onCloudProviderSelect,
-    onCloudModelSelect,
-  ]);
+  }, [selectedCloudProvider, onCloudProviderSelect]);
 
   useEffect(() => {
     loadLocalModelsRef.current = loadLocalModels;
@@ -526,22 +544,30 @@ export default function TranscriptionModelPicker({
 
   const handleCloudProviderChange = useCallback(
     (providerId: string) => {
-      onCloudProviderSelect(providerId);
-      const provider = cloudProviders.find((p) => p.id === providerId);
+      // AKASHML: Only "custom" is valid; ignore any other value passed in.
+      // AKASHML_HIDDEN_PROVIDERS to restore full logic below to re-enable other providers:
+      // onCloudProviderSelect(providerId);
+      // const provider = cloudProviders.find((p) => p.id === providerId);
+      // if (providerId === "custom") {
+      //   onCloudModelSelect("whisper-1");
+      //   return;
+      // }
+      // if (provider) {
+      //   setCloudTranscriptionBaseUrl?.(provider.baseUrl);
+      //   if (provider.models?.length) {
+      //     onCloudModelSelect(provider.models[0].id);
+      //   }
+      // }
 
       if (providerId === "custom") {
-        onCloudModelSelect("whisper-1");
-        return;
-      }
-
-      if (provider) {
-        setCloudTranscriptionBaseUrl?.(provider.baseUrl);
-        if (provider.models?.length) {
-          onCloudModelSelect(provider.models[0].id);
+        onCloudProviderSelect("custom");
+        // Keep whatever model is already set; default to whisper-1 if empty
+        if (!selectedCloudModel) {
+          onCloudModelSelect("whisper-1");
         }
       }
     },
-    [cloudProviders, onCloudProviderSelect, onCloudModelSelect, setCloudTranscriptionBaseUrl]
+    [onCloudProviderSelect, onCloudModelSelect, selectedCloudModel]
   );
 
   const handleLocalProviderChange = useCallback(
@@ -583,23 +609,24 @@ export default function TranscriptionModelPicker({
     if (normalized && normalized !== cloudTranscriptionBaseUrl) {
       setCloudTranscriptionBaseUrl(normalized);
     }
-    if (normalized) {
-      for (const provider of cloudProviders) {
-        const providerNormalized = normalizeBaseUrl(provider.baseUrl);
-        if (normalized === providerNormalized) {
-          onCloudProviderSelect(provider.id);
-          onCloudModelSelect("whisper-1");
-          break;
-        }
-      }
-    }
+
+    // AKASHML: The block below that auto-switches provider based on a recognised
+    // base URL is intentionally skipped — we always stay on "custom".
+    // AKASHML_HIDDEN_PROVIDERS to restore if other providers are re-enabled:
+    // if (normalized) {
+    //   for (const provider of cloudProviders) {
+    //     const providerNormalized = normalizeBaseUrl(provider.baseUrl);
+    //     if (normalized === providerNormalized) {
+    //       onCloudProviderSelect(provider.id);
+    //       onCloudModelSelect("whisper-1");
+    //       break;
+    //     }
+    //   }
+    // }
   }, [
     cloudTranscriptionBaseUrl,
     selectedCloudProvider,
     setCloudTranscriptionBaseUrl,
-    onCloudProviderSelect,
-    onCloudModelSelect,
-    cloudProviders,
   ]);
 
   const handleDelete = useCallback(
@@ -818,32 +845,47 @@ export default function TranscriptionModelPicker({
 
       {!useLocalWhisper ? (
         <div className={styles.container}>
+          {/*
+            AKASHML: The ProviderTabs row is rendered with only the single
+            "Akash ML" tab. To restore the
+            original cloudProviderTabs mapping, remove the scrollable prop
+            if it is no longer needed.
+          */}
           <div className="p-2 pb-0">
             <ProviderTabs
               providers={cloudProviderTabs}
               selectedId={selectedCloudProvider}
               onSelect={handleCloudProviderChange}
               colorScheme="purple"
-              scrollable
             />
           </div>
 
           <div className="p-2">
+            {/*
+              AKASHML: selectedCloudProvider is always "custom" so the block
+              below is the only branch that ever renders. The key labels have
+              been updated to say "Akash ML" where it matters for the user.
+              The original non-custom branch (API key + model card list for
+              openai/groq/mistral) is kept intact below, just unreachable.
+            */}
             {selectedCloudProvider === "custom" ? (
               <div className="space-y-2">
+                {/* Endpoint URL */}
                 <div className="space-y-1.5">
                   <label className="block text-xs font-medium text-foreground">
-                    {t("transcription.endpointUrl")}
+                    {/* AKASHML: was t("transcription.endpointUrl") */}
+                    Akash ML Endpoint URL
                   </label>
                   <Input
                     value={cloudTranscriptionBaseUrl}
                     onChange={(e) => setCloudTranscriptionBaseUrl?.(e.target.value)}
                     onBlur={handleBaseUrlBlur}
-                    placeholder="https://your-api.example.com/v1"
+                    placeholder="https://chatapi.akash.network/api/v1"
                     className="h-8 text-sm"
                   />
                 </div>
 
+                {/* API Key (optional) */}
                 <ApiKeyInput
                   apiKey={customTranscriptionApiKey}
                   setApiKey={setCustomTranscriptionApiKey || (() => {})}
@@ -851,6 +893,7 @@ export default function TranscriptionModelPicker({
                   helpText=""
                 />
 
+                {/* Model */}
                 <div className="space-y-1.5">
                   <label className="block text-xs font-medium text-foreground">
                     {t("common.model")}
@@ -864,6 +907,9 @@ export default function TranscriptionModelPicker({
                 </div>
               </div>
             ) : (
+              // AKASHML_HIDDEN_PROVIDERS — this branch is unreachable while only
+              // the "custom" tab is shown. Restore CLOUD_PROVIDER_TABS to make
+              // openai/groq/mistral tabs visible and reach this code again.
               <div className="space-y-2">
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">

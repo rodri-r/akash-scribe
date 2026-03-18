@@ -4,6 +4,20 @@ import logger from "../utils/logger";
 import { useLocalStorage } from "./useLocalStorage";
 import type { LocalTranscriptionProvider } from "../types/electron";
 
+// ─── AkashML defaults ────────────────────────────────────────────────────────
+// Single source of truth for the AkashML endpoint URL.
+// The provider is always "custom"; the base URL defaults to the AkashML API.
+// Both OnboardingFlow and SettingsPage have their own guards too, but this
+// hook-level correction fires earlier, before any component mounts. So
+// returning users with an old stored provider value are fixed transparently.
+//
+// AKASHML_HIDDEN_PROVIDERS: to restore multi-provider support, remove the
+// AKASHML_CORRECT_DEFAULTS useEffect below and revert the default values
+// in settingsStore (cloudTranscriptionProvider, cloudTranscriptionBaseUrl,
+// cloudTranscriptionMode, cloudReasoningMode).
+const AKASH_ML_BASE_URL = "https://chatapi.akash.network/api/v1";
+// ─────────────────────────────────────────────────────────────────────────────
+
 export interface TranscriptionSettings {
   uiLanguage: string;
   useLocalWhisper: boolean;
@@ -86,6 +100,42 @@ function useSettingsInternal() {
       );
     });
   }, []);
+
+  // AKASHML_CORRECT_DEFAULTS runs once after the store has been initialized.
+  // Silently migrates any stored value that points to another provider back to
+  // "custom" and AkashML URL so returning users never see a broken state.
+  // This is the earliest possible correction point (before any component tree
+  // renders) and complements the per-component guards in OnboardingFlow,
+  // TranscriptionModelPicker, and SettingsPage.
+  const hasAppliedAkashDefaults = useRef(false);
+  useEffect(() => {
+    if (hasAppliedAkashDefaults.current) return;
+    hasAppliedAkashDefaults.current = true;
+
+    const {
+      cloudTranscriptionProvider,
+      cloudTranscriptionBaseUrl,
+      cloudTranscriptionMode,
+      cloudReasoningMode,
+      setCloudTranscriptionProvider,
+      setCloudTranscriptionBaseUrl,
+      setCloudTranscriptionMode,
+      setCloudReasoningMode,
+    } = useSettingsStore.getState();
+
+    if (cloudTranscriptionProvider !== "custom") {
+      setCloudTranscriptionProvider("custom");
+    }
+    if (!cloudTranscriptionBaseUrl || cloudTranscriptionBaseUrl.trim() === "") {
+      setCloudTranscriptionBaseUrl(AKASH_ML_BASE_URL);
+    }
+    if (cloudTranscriptionMode !== "byok") {
+      setCloudTranscriptionMode("byok");
+    }
+    if (cloudReasoningMode !== "byok") {
+      setCloudReasoningMode("byok");
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Listen for dictionary updates from main process (auto-learn corrections)
   useEffect(() => {
