@@ -4,8 +4,6 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Badge } from "./ui/badge";
 import {
-  RefreshCw,
-  Download,
   Mic,
   Shield,
   FolderOpen,
@@ -220,15 +218,15 @@ function TranscriptionSection({
 }: TranscriptionSectionProps) {
   const { t } = useTranslation();
 
-  // AKASHML: "OpenWhispr Cloud" mode is hidden. Our app always uses BYOK/custom.
+  // AKASHML: "OpenWhispr Cloud" mode is hidden — the app always uses BYOK/custom.
   // The mode selector panel below is commented out so signed-in users no longer
   // see the Cloud vs Custom Setup toggle. The underlying state variables are kept
-  //
+  // so the rest of the codebase compiles without changes.
   //
   // To restore the mode selector, remove the comment block below and delete the
   // forced-BYOK useEffect. Search "AKASHML_HIDDEN_CLOUD_MODE" to find all sites.
 
-  // AKASHML_HIDDEN_CLOUD_MODE forces BYOK on mount so stored "openwhispr" values
+  // AKASHML_HIDDEN_CLOUD_MODE — force BYOK on mount so stored "openwhispr" values
   // are silently corrected without user action.
   useEffect(() => {
     if (cloudTranscriptionMode !== "byok") {
@@ -250,7 +248,7 @@ function TranscriptionSection({
       />
 
       {/*
-        AKASHML_HIDDEN_CLOUD_MODE is original Cloud vs Custom Setup mode selector.
+        AKASHML_HIDDEN_CLOUD_MODE — original Cloud vs Custom Setup mode selector.
         Uncomment this entire block to restore it when re-enabling other providers.
 
         {isSignedIn && (
@@ -299,7 +297,7 @@ function TranscriptionSection({
         )}
       */}
 
-      {/* Model picker always shown (BYOK/custom is the only mode) */}
+      {/* Model picker — always shown (BYOK/custom is the only mode) */}
       <TranscriptionModelPicker
         selectedCloudProvider={cloudTranscriptionProvider}
         onCloudProviderSelect={setCloudTranscriptionProvider}
@@ -397,7 +395,7 @@ function AiModelsSection({
 }: AiModelsSectionProps) {
   const { t } = useTranslation();
 
-  // AKASHML_HIDDEN_CLOUD_MODE forces BYOK for reasoning too, same rationale as
+  // AKASHML_HIDDEN_CLOUD_MODE — force BYOK for reasoning too, same rationale as
   // TranscriptionSection above. Restore by removing this useEffect and
   // uncommenting the mode selector block further below.
   useEffect(() => {
@@ -1420,7 +1418,9 @@ export default function SettingsPage({ activeSection = "general" }: SettingsPage
                       ))}
                     </ul>
                     {/*
-                      AKASHML: Support link.
+                      AKASHML: The "contact-sales" link originally pointed to
+                      openwhispr.com/contact-sales. Update the URL below to your
+                      own sales/contact page, or remove this button entirely.
                     */}
                     <Button
                       variant="outline"
@@ -1428,7 +1428,7 @@ export default function SettingsPage({ activeSection = "general" }: SettingsPage
                       className="mt-2 w-full h-6 text-[10px]"
                       onClick={() =>
                         window.electronAPI?.openExternal?.(
-                          "https://akash.network/support/"
+                          "https://akash.network/contact" // AKASHML: update to your contact URL
                         )
                       }
                     >
@@ -3047,167 +3047,22 @@ EOF`,
       case "system":
         return (
           <div className="space-y-6">
+            {/* AKASHML: Update check and download buttons removed. The upstream
+                OpenWhispr update server would install the wrong app on users
+                machines. Updates are distributed via GitHub releases instead.
+                Restore by uncommenting the original update SettingsPanel block. */}
             <div>
-              <SectionHeader title={t("settingsPage.general.updates.title")} />
+              <SectionHeader title="App Info" />
               <SettingsPanel>
                 <SettingsPanelRow>
                   <SettingsRow
-                    label={t("settingsPage.general.updates.currentVersion")}
-                    description={
-                      updateStatus.isDevelopment
-                        ? t("settingsPage.general.updates.devMode")
-                        : isUpdateAvailable
-                          ? t("settingsPage.general.updates.newVersionAvailable")
-                          : t("settingsPage.general.updates.latestVersion")
-                    }
+                    label="Version"
+                    description="Current installed version"
                   >
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-xs tabular-nums text-muted-foreground font-mono">
-                        {currentVersion || t("settingsPage.general.updates.versionPlaceholder")}
-                      </span>
-                      {updateStatus.isDevelopment ? (
-                        <Badge variant="warning">
-                          {t("settingsPage.general.updates.badges.dev")}
-                        </Badge>
-                      ) : isUpdateAvailable ? (
-                        <Badge variant="success">
-                          {t("settingsPage.general.updates.badges.update")}
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline">
-                          {t("settingsPage.general.updates.badges.latest")}
-                        </Badge>
-                      )}
-                    </div>
+                    <span className="text-xs tabular-nums text-muted-foreground font-mono">
+                      {currentVersion || "..."}
+                    </span>
                   </SettingsRow>
-                </SettingsPanelRow>
-
-                <SettingsPanelRow>
-                  <div className="space-y-2.5">
-                    <Button
-                      onClick={async () => {
-                        try {
-                          await checkForUpdates();
-                        } catch {}
-                      }}
-                      disabled={checkingForUpdates || updateStatus.isDevelopment}
-                      variant="outline"
-                      className="w-full"
-                      size="sm"
-                    >
-                      <RefreshCw
-                        size={13}
-                        className={`mr-1.5 ${checkingForUpdates ? "animate-spin" : ""}`}
-                      />
-                      {checkingForUpdates
-                        ? t("settingsPage.general.updates.checking")
-                        : t("settingsPage.general.updates.checkForUpdates")}
-                    </Button>
-
-                    {isUpdateAvailable && !updateStatus.updateDownloaded && (
-                      <div className="space-y-2">
-                        <Button
-                          onClick={async () => {
-                            try {
-                              await downloadUpdate();
-                            } catch {
-                              showAlertDialog({
-                                title: t(
-                                  "settingsPage.general.updates.dialogs.downloadFailed.title"
-                                ),
-                                description: t(
-                                  "settingsPage.general.updates.dialogs.downloadFailed.description"
-                                ),
-                              });
-                            }
-                          }}
-                          disabled={downloadingUpdate}
-                          variant="success"
-                          className="w-full"
-                          size="sm"
-                        >
-                          <Download
-                            size={13}
-                            className={`mr-1.5 ${downloadingUpdate ? "animate-pulse" : ""}`}
-                          />
-                          {downloadingUpdate
-                            ? t("settingsPage.general.updates.downloading", {
-                                progress: Math.round(updateDownloadProgress),
-                              })
-                            : t("settingsPage.general.updates.downloadUpdate", {
-                                version: updateInfo?.version || "",
-                              })}
-                        </Button>
-
-                        {downloadingUpdate && (
-                          <div className="h-1 w-full overflow-hidden rounded-full bg-muted/50">
-                            <div
-                              className="h-full bg-success transition-[width] duration-200 rounded-full"
-                              style={{
-                                width: `${Math.min(100, Math.max(0, updateDownloadProgress))}%`,
-                              }}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {updateStatus.updateDownloaded && (
-                      <Button
-                        onClick={() => {
-                          showConfirmDialog({
-                            title: t("settingsPage.general.updates.dialogs.installUpdate.title"),
-                            description: t(
-                              "settingsPage.general.updates.dialogs.installUpdate.description",
-                              { version: updateInfo?.version || "" }
-                            ),
-                            confirmText: t(
-                              "settingsPage.general.updates.dialogs.installUpdate.confirmText"
-                            ),
-                            onConfirm: async () => {
-                              try {
-                                await installUpdateAction();
-                              } catch {
-                                showAlertDialog({
-                                  title: t(
-                                    "settingsPage.general.updates.dialogs.installFailed.title"
-                                  ),
-                                  description: t(
-                                    "settingsPage.general.updates.dialogs.installFailed.description"
-                                  ),
-                                });
-                              }
-                            },
-                          });
-                        }}
-                        disabled={installInitiated}
-                        className="w-full"
-                        size="sm"
-                      >
-                        <RefreshCw
-                          size={14}
-                          className={`mr-2 ${installInitiated ? "animate-spin" : ""}`}
-                        />
-                        {installInitiated
-                          ? t("settingsPage.general.updates.restarting")
-                          : t("settingsPage.general.updates.installAndRestart")}
-                      </Button>
-                    )}
-                  </div>
-
-                  {updateInfo?.releaseNotes && (
-                    <div className="mt-4 pt-4 border-t border-border/30">
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                        {t("settingsPage.general.updates.whatsNew", {
-                          version: updateInfo.version,
-                        })}
-                      </p>
-                      <div
-                        className="text-xs text-muted-foreground [&_ul]:list-disc [&_ul]:pl-4 [&_ul]:space-y-1 [&_ol]:list-decimal [&_ol]:pl-4 [&_ol]:space-y-1 [&_li]:pl-1 [&_p]:mb-2 [&_p:last-child]:mb-0 [&_a]:text-link [&_a]:underline"
-                        dangerouslySetInnerHTML={{ __html: updateInfo.releaseNotes }}
-                      />
-                    </div>
-                  )}
                 </SettingsPanelRow>
               </SettingsPanel>
             </div>

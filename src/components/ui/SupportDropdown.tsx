@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "./button";
-import { HelpCircle, Mail, Bug } from "lucide-react";
+import { HelpCircle, Mail } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,6 +10,15 @@ import {
 } from "./dropdown-menu";
 import { cn } from "../lib/utils";
 import logger from "../../utils/logger";
+
+// AKASHML: Discord and support links updated to Akash Network official channels.
+// Bug report option removed - no public issue tracker for this fork yet.
+// AKASHML_HIDDEN: to restore original OpenWhispr links, revert to:
+//   Discord: https://discord.gg/yZWC9WTtX7
+//   Support email: support@openwhispr.com
+//   Bug report: https://github.com/OpenWhispr/openwhispr/issues
+const AKASH_DISCORD_URL = "https://discord.com/invite/akash";
+const AKASH_SUPPORT_URL = "https://akash.network/support/";
 
 function DiscordIcon({ className }: { className?: string }) {
   return (
@@ -54,26 +63,13 @@ export default function SupportDropdown({ className, trigger }: SupportDropdownP
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => openExternal("https://discord.gg/yZWC9WTtX7")}>
+        <DropdownMenuItem onClick={() => openExternal(AKASH_DISCORD_URL)}>
           <DiscordIcon className="mr-2 h-4 w-4" />
           {t("support.joinDiscord")}
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={async () => {
-            const result = await window.electronAPI?.openExternal("mailto:support@openwhispr.com");
-            if (!result?.success) {
-              openExternal("https://mail.google.com/mail/?view=cm&to=support@openwhispr.com");
-            }
-          }}
-        >
+        <DropdownMenuItem onClick={() => openExternal(AKASH_SUPPORT_URL)}>
           <Mail className="mr-2 h-4 w-4" />
           {t("support.contactSupport")}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => openExternal("https://github.com/OpenWhispr/openwhispr/issues")}
-        >
-          <Bug className="mr-2 h-4 w-4" />
-          {t("support.submitBug")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
