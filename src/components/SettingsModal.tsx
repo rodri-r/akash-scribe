@@ -7,13 +7,11 @@ import {
   UserCircle,
   Wrench,
   Keyboard,
-  CreditCard,
   Shield,
   MessageSquare,
 } from "lucide-react";
 import SidebarModal, { SidebarItem } from "./ui/SidebarModal";
 import SettingsPage, { SettingsSectionType } from "./SettingsPage";
-
 export type { SettingsSectionType };
 
 // Maps old section IDs to new ones for backward-compatible deep-linking
@@ -25,6 +23,9 @@ const SECTION_ALIASES: Record<string, SettingsSectionType> = {
   privacy: "privacyData",
   permissions: "privacyData",
   developer: "system",
+  // AKASHML_HIDDEN: plansBilling removed as a valid section.
+  // If anything deep-links to plansBilling, redirect to account instead.
+  plansBilling: "account",
 };
 
 interface SettingsModalProps {
@@ -35,20 +36,24 @@ interface SettingsModalProps {
 
 export default function SettingsModal({ open, onOpenChange, initialSection }: SettingsModalProps) {
   const { t } = useTranslation();
+
   const sidebarItems: SidebarItem<SettingsSectionType>[] = useMemo(
     () => [
+      // AKASHML: Account section kept - shows sign-in status.
+      // Plans & Billing removed - not relevant for AkashML API key users.
+      // AKASHML_HIDDEN: to restore Plans & Billing add back:
+      //   {
+      //     id: "plansBilling",
+      //     label: t("settingsModal.sections.plansBilling.label"),
+      //     icon: CreditCard,
+      //     description: t("settingsModal.sections.plansBilling.description"),
+      //     group: t("settingsModal.groups.account"),
+      //   },
       {
         id: "account",
         label: t("settingsModal.sections.account.label"),
         icon: UserCircle,
         description: t("settingsModal.sections.account.description"),
-        group: t("settingsModal.groups.account"),
-      },
-      {
-        id: "plansBilling",
-        label: t("settingsModal.sections.plansBilling.label"),
-        icon: CreditCard,
-        description: t("settingsModal.sections.plansBilling.description"),
         group: t("settingsModal.groups.account"),
       },
       {
@@ -104,7 +109,9 @@ export default function SettingsModal({ open, onOpenChange, initialSection }: Se
     [t]
   );
 
-  const [activeSection, setActiveSection] = React.useState<SettingsSectionType>("account");
+  // AKASHML: default changed from "account" to "general" since account/billing
+  // is less relevant for users who just need to configure their AkashML API key.
+  const [activeSection, setActiveSection] = React.useState<SettingsSectionType>("general");
 
   // Navigate to initial section when modal opens, resolving legacy aliases
   useEffect(() => {

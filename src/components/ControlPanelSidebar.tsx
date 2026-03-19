@@ -1,24 +1,27 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Home,
   NotebookPen,
   BookOpen,
   Upload,
   Blocks,
-  Gift,
   Settings,
   HelpCircle,
   UserCircle,
-  X,
   Search,
+  ExternalLink,
 } from "lucide-react";
 import logoIcon from "../assets/icon.png";
 import { useTranslation } from "react-i18next";
 import { cn } from "./lib/utils";
 import SupportDropdown from "./ui/SupportDropdown";
 import { getCachedPlatform } from "../utils/platform";
+import { createExternalLinkHandler } from "../utils/externalLinks";
 
 const platform = getCachedPlatform();
+
+// AKASHML: AkashML signup page - users need an account to get their API key
+const AKASH_ML_URL = "https://akashml.com/";
 
 export type ControlPanelView = "home" | "personal-notes" | "dictionary" | "upload" | "integrations";
 
@@ -27,18 +30,21 @@ interface ControlPanelSidebarProps {
   onViewChange: (view: ControlPanelView) => void;
   onOpenSettings: () => void;
   onOpenSearch?: () => void;
+  // AKASHML_HIDDEN: these props are kept in the interface so ControlPanel.tsx
+  // compiles without changes, but they are intentionally unused in this fork.
+  // Restore by uncommenting the relevant JSX blocks below.
   onOpenReferrals?: () => void;
   onUpgrade?: () => void;
   onUpgradeCheckout?: () => void;
   isOverLimit?: boolean;
+  isProUser?: boolean;
+  usageLoaded?: boolean;
+  updateAction?: React.ReactNode;
   userName?: string | null;
   userEmail?: string | null;
   userImage?: string | null;
   isSignedIn?: boolean;
   authLoaded?: boolean;
-  isProUser?: boolean;
-  usageLoaded?: boolean;
-  updateAction?: React.ReactNode;
 }
 
 export default function ControlPanelSidebar({
@@ -46,31 +52,18 @@ export default function ControlPanelSidebar({
   onViewChange,
   onOpenSettings,
   onOpenSearch,
-  onOpenReferrals,
-  onUpgrade,
-  onUpgradeCheckout,
-  isOverLimit,
   userName,
   userEmail,
   userImage,
   isSignedIn,
   authLoaded,
-  isProUser,
-  usageLoaded,
-  updateAction,
 }: ControlPanelSidebarProps) {
   const { t } = useTranslation();
-  const [upgradeDismissed, setUpgradeDismissed] = useState(
-    () => localStorage.getItem("upgradeProDismissed") === "true"
-  );
 
-  const showLimitBanner = authLoaded && isSignedIn && !isProUser && isOverLimit;
-  const showUpgradeBanner =
-    !showLimitBanner &&
-    authLoaded &&
-    (!isSignedIn || usageLoaded !== false) &&
-    !isProUser &&
-    !upgradeDismissed;
+  // AKASHML_HIDDEN: showLimitBanner and showUpgradeBanner removed.
+  // The original OpenWhispr Pro upgrade prompts depended on isProUser /
+  // usageLoaded / isOverLimit. Restore by adding those props back to the
+  // destructured list above and uncommenting the banner JSX below.
 
   const navItems: {
     id: ControlPanelView;
@@ -159,82 +152,101 @@ export default function ControlPanelSidebar({
 
       <div className="flex-1" />
 
-      {showLimitBanner && (
-        <div className="px-2 pb-2">
-          <div className="rounded-lg border border-destructive/25 bg-destructive/5 dark:bg-destructive/10 p-3">
-            <div className="flex flex-col items-center text-center">
-              <img src={logoIcon} alt="" className="w-7 h-7 rounded-md mb-2" />
-              <p className="text-xs font-medium text-foreground mb-0.5">
-                {t("sidebar.limitReached")}
-              </p>
-              <p className="text-[11px] leading-snug text-muted-foreground mb-2.5">
-                {t("sidebar.limitReachedDescription")}
-              </p>
-              <button
-                onClick={onUpgradeCheckout}
-                className="w-full h-7 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors"
-              >
-                {t("sidebar.upgradeToPro")}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/*
+        AKASHML_HIDDEN: original showLimitBanner block (limit reached, upgrade to Pro).
+        Restore by adding isProUser, usageLoaded, isOverLimit back to props and
+        uncommenting this block:
 
-      {showUpgradeBanner && (
-        <div className="px-2 pb-2">
-          <div className="relative rounded-lg border border-primary/20 bg-primary/5 dark:bg-primary/10 p-3">
-            <button
-              onClick={() => {
-                setUpgradeDismissed(true);
-                localStorage.setItem("upgradeProDismissed", "true");
-              }}
-              aria-label={t("common.dismiss")}
-              className="absolute top-1.5 right-1.5 p-0.5 rounded-sm text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-            >
-              <X size={12} />
-            </button>
-            <div className="flex flex-col items-center text-center pt-1">
-              <img src={logoIcon} alt="" className="w-7 h-7 rounded-md mb-2" />
-              <p className="text-xs font-medium text-foreground mb-0.5">
-                {t("sidebar.upgradeTitle")}
-              </p>
-              <p className="text-[11px] leading-snug text-muted-foreground mb-2.5">
-                {t("sidebar.upgradeDescription")}
-              </p>
-              <button
-                onClick={onUpgrade}
-                className="w-full h-7 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors"
-              >
-                {t("sidebar.learnMore")}
-              </button>
+        {showLimitBanner && (
+          <div className="px-2 pb-2">
+            <div className="rounded-lg border border-destructive/25 bg-destructive/5 dark:bg-destructive/10 p-3">
+              <div className="flex flex-col items-center text-center">
+                <img src={logoIcon} alt="" className="w-7 h-7 rounded-md mb-2" />
+                <p className="text-xs font-medium text-foreground mb-0.5">
+                  {t("sidebar.limitReached")}
+                </p>
+                <p className="text-[11px] leading-snug text-muted-foreground mb-2.5">
+                  {t("sidebar.limitReachedDescription")}
+                </p>
+                <button
+                  onClick={onUpgradeCheckout}
+                  className="w-full h-7 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors"
+                >
+                  {t("sidebar.upgradeToPro")}
+                </button>
+              </div>
             </div>
           </div>
+        )}
+      */}
+
+      {/* AKASHML: Akash ML signup card - replaces the original "Upgrade to Pro" banner.
+          Directs users to akashml.com to create an account and get their API key. */}
+      <div className="px-2 pb-2">
+        <div className="rounded-lg border border-primary/20 bg-primary/5 dark:bg-primary/10 p-3">
+          <div className="flex flex-col items-center text-center">
+            <img src={logoIcon} alt="Akash ML" className="w-7 h-7 rounded-md mb-2" />
+            <p className="text-xs font-semibold text-foreground mb-0.5">
+              Akash ML
+            </p>
+            <p className="text-[11px] leading-snug text-muted-foreground mb-2.5">
+              Get your API key to enable cloud transcription
+            </p>
+            <button
+              onClick={createExternalLinkHandler(AKASH_ML_URL)}
+              className="w-full h-7 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-1.5"
+            >
+              <ExternalLink size={11} />
+              Get API Key
+            </button>
+          </div>
         </div>
-      )}
+      </div>
+
+      {/*
+        AKASHML_HIDDEN: original showUpgradeBanner block (Upgrade to Pro, Learn More).
+        Restore by adding upgradeDismissed state, isProUser, usageLoaded props back
+        and uncommenting this block:
+
+        {showUpgradeBanner && (
+          <div className="px-2 pb-2">
+            <div className="relative rounded-lg border border-primary/20 bg-primary/5 dark:bg-primary/10 p-3">
+              <button onClick={() => { setUpgradeDismissed(true); ... }} ...>
+                <X size={12} />
+              </button>
+              ...
+              <button onClick={onUpgrade} ...>{t("sidebar.learnMore")}</button>
+            </div>
+          </div>
+        )}
+      */}
 
       <div className="px-2 pb-2 space-y-0.5">
-        {updateAction && (
-          <div className="px-1 pb-1" style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}>
-            {updateAction}
-          </div>
-        )}
+        {/*
+          AKASHML_HIDDEN: updateAction button (Update Available) removed from sidebar.
+          The update check is still available inside Settings > System.
+          Restore by adding updateAction back to the destructured props and
+          uncommenting this block:
 
-        {isSignedIn && onOpenReferrals && (
-          <button
-            onClick={onOpenReferrals}
-            aria-label={t("sidebar.referral")}
-            className="group flex items-center gap-2.5 w-full h-8 px-2.5 rounded-md text-left outline-none hover:bg-foreground/4 dark:hover:bg-white/4 focus-visible:ring-1 focus-visible:ring-primary/30 transition-colors duration-150"
-          >
-            <Gift
-              size={15}
-              className="shrink-0 text-foreground/60 group-hover:text-foreground/75 dark:text-foreground/50 dark:group-hover:text-foreground/65 transition-colors duration-150"
-            />
-            <span className="text-xs text-foreground/80 group-hover:text-foreground dark:text-foreground/70 dark:group-hover:text-foreground/85 transition-colors duration-150">
-              {t("sidebar.referral")}
-            </span>
-          </button>
-        )}
+          {updateAction && (
+            <div className="px-1 pb-1" style={{ WebkitAppRegion: "no-drag" }}>
+              {updateAction}
+            </div>
+          )}
+        */}
+
+        {/*
+          AKASHML_HIDDEN: Referrals button removed - tied to OpenWhispr referral program.
+          Restore by adding onOpenReferrals back to destructured props and
+          uncommenting this block:
+
+          {isSignedIn && onOpenReferrals && (
+            <button onClick={onOpenReferrals} ...>
+              <Gift size={15} ... />
+              <span ...>{t("sidebar.referral")}</span>
+            </button>
+          )}
+        */}
 
         <button
           onClick={onOpenSettings}

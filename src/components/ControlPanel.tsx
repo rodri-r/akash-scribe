@@ -1,13 +1,11 @@
 import React, { Suspense, useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "./ui/button";
-import { Download, RefreshCw, Loader2, AlertTriangle, Zap, ChevronLeft } from "lucide-react";
-import UpgradePrompt from "./UpgradePrompt";
+import { Loader2, AlertTriangle, Zap, ChevronLeft } from "lucide-react";
 import { ConfirmDialog, AlertDialog } from "./ui/dialog";
 import { useDialogs } from "../hooks/useDialogs";
 import { useHotkey } from "../hooks/useHotkey";
 import { useToast } from "./ui/Toast";
-import { useUpdater } from "../hooks/useUpdater";
 import { useSettings } from "../hooks/useSettings";
 import { useAuth } from "../hooks/useAuth";
 import { useUsage } from "../hooks/useUsage";
@@ -21,6 +19,11 @@ import {
 import ControlPanelSidebar, { type ControlPanelView } from "./ControlPanelSidebar";
 import WindowControls from "./WindowControls";
 
+// AKASHML_HIDDEN: useUpdater import kept for the System settings tab update check.
+// The sidebar update button and UpgradePrompt/ReferralModal have been removed.
+// To restore sidebar update button: re-add updateAction prop to ControlPanelSidebar call.
+import { useUpdater } from "../hooks/useUpdater";
+
 import { getCachedPlatform } from "../utils/platform";
 import { setActiveNoteId, setActiveFolderId } from "../stores/noteStore";
 import HistoryView from "./HistoryView";
@@ -28,26 +31,36 @@ import HistoryView from "./HistoryView";
 const platform = getCachedPlatform();
 
 const SettingsModal = React.lazy(() => import("./SettingsModal"));
-const ReferralModal = React.lazy(() => import("./ReferralModal"));
 const PersonalNotesView = React.lazy(() => import("./notes/PersonalNotesView"));
 const DictionaryView = React.lazy(() => import("./DictionaryView"));
 const UploadAudioView = React.lazy(() => import("./notes/UploadAudioView"));
 const IntegrationsView = React.lazy(() => import("./IntegrationsView"));
 const CommandSearch = React.lazy(() => import("./CommandSearch"));
 
+// AKASHML_HIDDEN: ReferralModal removed - tied to OpenWhispr referral program.
+// Restore by adding: const ReferralModal = React.lazy(() => import("./ReferralModal"));
+
 export default function ControlPanel() {
   const { t } = useTranslation();
   const history = useTranscriptions();
   const [isLoading, setIsLoading] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
-  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
-  const [limitData, setLimitData] = useState<{ wordsUsed: number; limit: number } | null>(null);
-  const hasShownUpgradePrompt = useRef(false);
+
+  // AKASHML_HIDDEN: showUpgradePrompt, limitData, hasShownUpgradePrompt removed.
+  // These powered the word-limit upgrade flow for OpenWhispr Pro.
+  // Restore by adding back:
+  //   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  //   const [limitData, setLimitData] = useState<{ wordsUsed: number; limit: number } | null>(null);
+  //   const hasShownUpgradePrompt = useRef(false);
+
   const [settingsSection, setSettingsSection] = useState<string | undefined>();
   const [aiCTADismissed, setAiCTADismissed] = useState(
     () => localStorage.getItem("aiCTADismissed") === "true"
   );
-  const [showReferrals, setShowReferrals] = useState(false);
+
+  // AKASHML_HIDDEN: showReferrals removed - tied to OpenWhispr referral program.
+  // Restore by adding: const [showReferrals, setShowReferrals] = useState(false);
+
   const [showSearch, setShowSearch] = useState(false);
   const [showCloudMigrationBanner, setShowCloudMigrationBanner] = useState(false);
   const [activeView, setActiveView] = useState<ControlPanelView>("home");
@@ -132,27 +145,8 @@ export default function ControlPanel() {
     }
   }, [updateError, toast, t]);
 
-  useEffect(() => {
-    const dispose = window.electronAPI?.onLimitReached?.(
-      (data: { wordsUsed: number; limit: number }) => {
-        if (!hasShownUpgradePrompt.current) {
-          hasShownUpgradePrompt.current = true;
-          setLimitData(data);
-          setShowUpgradePrompt(true);
-        } else {
-          toast({
-            title: t("controlPanel.limit.weeklyTitle"),
-            description: t("controlPanel.limit.weeklyDescription"),
-            duration: 5000,
-          });
-        }
-      }
-    );
-
-    return () => {
-      dispose?.();
-    };
-  }, [toast, t]);
+  // AKASHML_HIDDEN: onLimitReached handler removed - triggered OpenWhispr Pro upgrade prompt.
+  // Restore by adding the useEffect back with setLimitData / setShowUpgradePrompt calls.
 
   useEffect(() => {
     if (!usage?.isPastDue || !usage.hasLoaded) return;
@@ -214,7 +208,6 @@ export default function ControlPanel() {
     return () => cleanup?.();
   }, []);
 
-  // When accessibility is missing on macOS, open the permissions settings page
   useEffect(() => {
     const cleanup = window.electronAPI?.onAccessibilityMissing?.(() => {
       setSettingsSection("privacyData");
@@ -361,7 +354,6 @@ export default function ControlPanel() {
           const rawText = result.transcription.text;
           let finalTranscription = result.transcription;
 
-          // Apply AI reasoning if enabled
           if (useReasoningModel) {
             try {
               const [
@@ -388,7 +380,7 @@ export default function ControlPanel() {
                 }
               }
             } catch {
-              // Reasoning failed — keep the raw STT result
+              // Reasoning failed - keep the raw STT result
             }
           }
 
@@ -411,72 +403,6 @@ export default function ControlPanel() {
     [toast, t, useReasoningModel]
   );
 
-  const handleUpdateClick = async () => {
-    if (updateStatus.updateDownloaded) {
-      showConfirmDialog({
-        title: t("controlPanel.update.installTitle"),
-        description: t("controlPanel.update.installDescription"),
-        onConfirm: async () => {
-          try {
-            await installUpdate();
-          } catch (error) {
-            toast({
-              title: t("controlPanel.update.couldNotInstallTitle"),
-              description: t("controlPanel.update.couldNotInstallDescription"),
-              variant: "destructive",
-            });
-          }
-        },
-      });
-    } else if (updateStatus.updateAvailable && !isDownloading) {
-      try {
-        await downloadUpdate();
-      } catch (error) {
-        toast({
-          title: t("controlPanel.update.couldNotDownloadTitle"),
-          description: t("controlPanel.update.couldNotDownloadDescription"),
-          variant: "destructive",
-        });
-      }
-    }
-  };
-
-  const getUpdateButtonContent = () => {
-    if (isInstalling) {
-      return (
-        <>
-          <Loader2 size={14} className="animate-spin" />
-          <span>{t("controlPanel.update.installing")}</span>
-        </>
-      );
-    }
-    if (isDownloading) {
-      return (
-        <>
-          <Loader2 size={14} className="animate-spin" />
-          <span>{Math.round(downloadProgress)}%</span>
-        </>
-      );
-    }
-    if (updateStatus.updateDownloaded) {
-      return (
-        <>
-          <RefreshCw size={14} />
-          <span>{t("controlPanel.update.installButton")}</span>
-        </>
-      );
-    }
-    if (updateStatus.updateAvailable) {
-      return (
-        <>
-          <Download size={14} />
-          <span>{t("controlPanel.update.availableButton")}</span>
-        </>
-      );
-    }
-    return null;
-  };
-
   return (
     <div className="h-screen bg-background flex flex-col">
       <ConfirmDialog
@@ -496,12 +422,16 @@ export default function ControlPanel() {
         onOk={() => {}}
       />
 
-      <UpgradePrompt
-        open={showUpgradePrompt}
-        onOpenChange={setShowUpgradePrompt}
-        wordsUsed={limitData?.wordsUsed}
-        limit={limitData?.limit}
-      />
+      {/*
+        AKASHML_HIDDEN: UpgradePrompt removed - OpenWhispr Pro word-limit paywall.
+        Restore by adding back:
+          <UpgradePrompt
+            open={showUpgradePrompt}
+            onOpenChange={setShowUpgradePrompt}
+            wordsUsed={limitData?.wordsUsed}
+            limit={limitData?.limit}
+          />
+      */}
 
       {showSettings && (
         <Suspense fallback={null}>
@@ -516,11 +446,15 @@ export default function ControlPanel() {
         </Suspense>
       )}
 
-      {showReferrals && (
-        <Suspense fallback={null}>
-          <ReferralModal open={showReferrals} onOpenChange={setShowReferrals} />
-        </Suspense>
-      )}
+      {/*
+        AKASHML_HIDDEN: ReferralModal removed - OpenWhispr referral program.
+        Restore by adding back:
+          {showReferrals && (
+            <Suspense fallback={null}>
+              <ReferralModal open={showReferrals} onOpenChange={setShowReferrals} />
+            </Suspense>
+          )}
+      */}
 
       {showSearch && (
         <Suspense fallback={null}>
@@ -552,37 +486,21 @@ export default function ControlPanel() {
               setSettingsSection(undefined);
               setShowSettings(true);
             }}
-            onOpenReferrals={() => setShowReferrals(true)}
-            onUpgrade={() => {
-              setSettingsSection("plansBilling");
-              setShowSettings(true);
-            }}
-            onUpgradeCheckout={() => usage?.openCheckout()}
-            isOverLimit={usage?.isOverLimit ?? false}
             userName={user?.name}
             userEmail={user?.email}
             userImage={user?.image}
             isSignedIn={isSignedIn}
             authLoaded={authLoaded}
-            isProUser={!!(usage?.isSubscribed || usage?.isTrial)}
-            usageLoaded={usage?.hasLoaded ?? false}
-            updateAction={
-              !updateStatus.isDevelopment &&
-              (updateStatus.updateAvailable ||
-                updateStatus.updateDownloaded ||
-                isDownloading ||
-                isInstalling) ? (
-                <Button
-                  variant={updateStatus.updateDownloaded ? "default" : "outline"}
-                  size="sm"
-                  onClick={handleUpdateClick}
-                  disabled={isInstalling || isDownloading}
-                  className="gap-1.5 text-xs w-full h-7"
-                >
-                  {getUpdateButtonContent()}
-                </Button>
-              ) : undefined
-            }
+            // AKASHML_HIDDEN: these props are intentionally omitted - they powered
+            // the OpenWhispr Pro upgrade flow and sidebar update button.
+            // Restore by passing:
+            //   onOpenReferrals={() => setShowReferrals(true)}
+            //   onUpgrade={() => { setSettingsSection("plansBilling"); setShowSettings(true); }}
+            //   onUpgradeCheckout={() => usage?.openCheckout()}
+            //   isOverLimit={usage?.isOverLimit ?? false}
+            //   isProUser={!!(usage?.isSubscribed || usage?.isTrial)}
+            //   usageLoaded={usage?.hasLoaded ?? false}
+            //   updateAction={...}
           />
         </div>
         <main className="flex-1 flex flex-col overflow-hidden">
