@@ -1,6 +1,6 @@
 {
   "name": "akash-scribe",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A desktop dictation application that uses Akash ML for speech-to-text transcription",
   "main": "main.js",
   "private": true,

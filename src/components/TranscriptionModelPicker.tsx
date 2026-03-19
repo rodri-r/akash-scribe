@@ -29,7 +29,7 @@ import { getCachedPlatform } from "../utils/platform";
 import type { CudaWhisperStatus } from "../types/electron";
 import logger from "../utils/logger";
 
-// ─── AkashML ────────────────────────────────────────────────────────
+// ─── AkashML branding ────────────────────────────────────────────────────────
 // The four original cloud provider tabs (openai, groq, mistral, openwhispr-cloud)
 // are commented out below under the label AKASHML_HIDDEN_PROVIDERS.
 // To restore them later, uncomment CLOUD_PROVIDER_TABS and remove
@@ -51,9 +51,11 @@ const AKASHML_CLOUD_PROVIDER_TABS = [
 
 const VALID_CLOUD_PROVIDER_IDS = ["openai", "groq", "mistral", "custom"];
 
+// AKASHML: renamed from "OpenAI Whisper" / "NVIDIA Parakeet" to feel provider-neutral.
+// AKASHML_HIDDEN_PROVIDERS: revert to original names if re-enabling multi-provider.
 const LOCAL_PROVIDER_TABS: Array<{ id: string; name: string; disabled?: boolean }> = [
-  { id: "whisper", name: "OpenAI Whisper" },
-  { id: "nvidia", name: "NVIDIA Parakeet" },
+  { id: "whisper", name: "Whisper (Local)" },
+  { id: "nvidia", name: "Parakeet (Local)" },
 ];
 
 interface LocalModel {
@@ -331,7 +333,7 @@ export default function TranscriptionModelPicker({
   //   const cloudProviderTabs = CLOUD_PROVIDER_TABS.map((provider) =>
   //     provider.id === "custom" ? { ...provider, name: t("transcription.customProvider") } : provider
   //   );
-  // AKASHML_HIDDEN_PROVIDERS restore the line above and remove the one below to re-enable all tabs.
+  // AKASHML_HIDDEN_PROVIDERS — restore the line above and remove the one below to re-enable all tabs.
   const cloudProviderTabs = AKASHML_CLOUD_PROVIDER_TABS;
 
   useEffect(() => {
@@ -391,10 +393,10 @@ export default function TranscriptionModelPicker({
   }, []);
 
   const ensureValidCloudSelection = useCallback(() => {
-    // AKASHML: Always force "custom" provider. No need to detect or fall back
+    // AKASHML: Always force "custom" provider — no need to detect or fall back
     // to other providers. The original multi-provider logic is preserved below.
     //
-    // AKASHML_HIDDEN_PROVIDERS original logic to restore later:
+    // AKASHML_HIDDEN_PROVIDERS — original logic to restore later:
     // const isValidProvider = VALID_CLOUD_PROVIDER_IDS.includes(selectedCloudProvider);
     // if (!isValidProvider) {
     //   const knownProviderUrls = cloudProviders.map((p) => p.baseUrl);
@@ -545,7 +547,7 @@ export default function TranscriptionModelPicker({
   const handleCloudProviderChange = useCallback(
     (providerId: string) => {
       // AKASHML: Only "custom" is valid; ignore any other value passed in.
-      // AKASHML_HIDDEN_PROVIDERS to restore full logic below to re-enable other providers:
+      // AKASHML_HIDDEN_PROVIDERS — restore full logic below to re-enable other providers:
       // onCloudProviderSelect(providerId);
       // const provider = cloudProviders.find((p) => p.id === providerId);
       // if (providerId === "custom") {
@@ -612,7 +614,7 @@ export default function TranscriptionModelPicker({
 
     // AKASHML: The block below that auto-switches provider based on a recognised
     // base URL is intentionally skipped — we always stay on "custom".
-    // AKASHML_HIDDEN_PROVIDERS to restore if other providers are re-enabled:
+    // AKASHML_HIDDEN_PROVIDERS — restore if other providers are re-enabled:
     // if (normalized) {
     //   for (const provider of cloudProviders) {
     //     const providerNormalized = normalizeBaseUrl(provider.baseUrl);
@@ -847,8 +849,8 @@ export default function TranscriptionModelPicker({
         <div className={styles.container}>
           {/*
             AKASHML: The ProviderTabs row is rendered with only the single
-            "Akash ML" tab. To restore the
-            original cloudProviderTabs mapping, remove the scrollable prop
+            "Akash ML" tab. When other providers are re-enabled, restore the
+            original cloudProviderTabs mapping and remove the scrollable prop
             if it is no longer needed.
           */}
           <div className="p-2 pb-0">
@@ -870,10 +872,22 @@ export default function TranscriptionModelPicker({
             */}
             {selectedCloudProvider === "custom" ? (
               <div className="space-y-2">
+                {/* Option C — Akash Network info card */}
+                <div className="rounded-md border border-primary/20 bg-primary/5 dark:border-primary/15 dark:bg-primary/8 px-3 py-2.5 flex items-start gap-2.5">
+                  <Zap size={13} className="text-primary shrink-0 mt-0.5" />
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-foreground leading-tight">
+                      ⚡ Powered by Akash Network
+                    </p>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed mt-0.5">
+                      Decentralized, censorship-resistant AI inference. Your API key stays on your device.
+                    </p>
+                  </div>
+                </div>
+
                 {/* Endpoint URL */}
                 <div className="space-y-1.5">
                   <label className="block text-xs font-medium text-foreground">
-                    {/* AKASHML: was t("transcription.endpointUrl") */}
                     Akash ML Endpoint URL
                   </label>
                   <Input
@@ -885,11 +899,11 @@ export default function TranscriptionModelPicker({
                   />
                 </div>
 
-                {/* API Key (optional) */}
+                {/* Fix 1 — removed "(Optional)" from label, API key is required for AkashML */}
                 <ApiKeyInput
                   apiKey={customTranscriptionApiKey}
                   setApiKey={setCustomTranscriptionApiKey || (() => {})}
-                  label={t("transcription.apiKeyOptional")}
+                  label="Akash ML API Key"
                   helpText=""
                 />
 
@@ -1037,6 +1051,14 @@ export default function TranscriptionModelPicker({
             )}
 
           <div className="p-2">
+            {/* Option B — Akash Network local compute messaging */}
+            <div className="mb-2 rounded-md border border-border/50 bg-muted/40 px-3 py-2 flex items-start gap-2">
+              <Lock size={11} className="text-muted-foreground shrink-0 mt-0.5" />
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                <span className="font-medium text-foreground">Running fully on your machine</span> — no cloud, no API key, completely private. Powered by the same open models available on the{" "}
+                <span className="font-medium text-primary">Akash Network</span> decentralized GPU marketplace.
+              </p>
+            </div>
             {internalLocalProvider === "whisper" && renderLocalModels()}
             {internalLocalProvider === "nvidia" && renderParakeetModels()}
           </div>
