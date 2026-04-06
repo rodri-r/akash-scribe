@@ -189,19 +189,21 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     checkStatus();
   }, [useLocalWhisper, whisperModel, parakeetModel, localTranscriptionProvider]);
 
-  // ─── Force "custom" provider + AkashML URL on first cloud-mode render ──────
-  // This ensures the app always defaults to the AkashML endpoint rather than
-  // prompting the user to choose a provider. The other providers (openai, groq,
-  // mistral, openwhispr-cloud) are intentionally hidden for this fork but their
-  // code remains in TranscriptionModelPicker so they can be re-enabled later.
+  // AKASHML: Force cloud mode + custom provider + AkashML URL on mount.
+  // Local mode (Whisper/Parakeet) is hidden from onboarding in this fork.
+  // AKASHML_HIDDEN_LOCAL: to restore local mode in onboarding, remove this
+  // useEffect and restore the ModeToggle in TranscriptionModelPicker.
   useEffect(() => {
-    if (!useLocalWhisper && cloudTranscriptionProvider !== "custom") {
+    if (useLocalWhisper) {
+      updateTranscriptionSettings({ useLocalWhisper: false });
+    }
+    if (cloudTranscriptionProvider !== "custom") {
       updateTranscriptionSettings({ cloudTranscriptionProvider: "custom" });
     }
     if (!cloudTranscriptionBaseUrl || cloudTranscriptionBaseUrl.trim() === "") {
       updateTranscriptionSettings({ cloudTranscriptionBaseUrl: AKASH_ML_BASE_URL });
     }
-  }, [useLocalWhisper, cloudTranscriptionProvider, cloudTranscriptionBaseUrl, updateTranscriptionSettings]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   // ─────────────────────────────────────────────────────────────────────────────
 
   // Auto-register default hotkey when entering the activation step
@@ -738,30 +740,15 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           return true;
         }
 
-        // For non-signed-in users: Setup - check if configuration is complete
-        if (useLocalWhisper) {
-          const modelToCheck =
-            localTranscriptionProvider === "nvidia" ? parakeetModel : whisperModel;
-          return modelToCheck !== "" && isModelDownloaded;
-        } else {
-          // Only show Akash ML provider.
-          // The original per-provider checks are preserved below as comments
-          // so they can be restored if other providers are re-enabled later.
-          // Search for "AKASHML_HIDDEN_PROVIDERS" to find the matching block
-          // in TranscriptionModelPicker.tsx.
-          //
-          // if (cloudTranscriptionProvider === "openai") {
-          //   return openaiApiKey.trim().length > 0;
-          // } else if (cloudTranscriptionProvider === "groq") {
-          //   return groqApiKey.trim().length > 0;
-          // } else if (cloudTranscriptionProvider === "mistral") {
-          //   return mistralApiKey.trim().length > 0;
-          // } else if (cloudTranscriptionProvider === "custom") {
-          //   return true; // Custom can work without API key for local endpoints
-          // }
-          // return openaiApiKey.trim().length > 0; // Default to OpenAI
-          return true; // AkashML custom endpoint — no key required to proceed
-        }
+        // For non-signed-in users: Setup - always cloud/AkashML mode.
+        // AKASHML_HIDDEN_LOCAL: local model check removed since local tab is
+        // hidden. Restore by uncommenting the useLocalWhisper block below:
+        // if (useLocalWhisper) {
+        //   const modelToCheck =
+        //     localTranscriptionProvider === "nvidia" ? parakeetModel : whisperModel;
+        //   return modelToCheck !== "" && isModelDownloaded;
+        // }
+        return true; // Cloud/AkashML mode - always allow proceeding
       case 2: {
         // For signed-in users, this is activation step
         if (isSignedIn && !skipAuth) {

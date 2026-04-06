@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "./ui/button";
-import { FolderOpen, Copy, Check } from "lucide-react";
+import { FolderOpen, Copy, Check, Shield } from "lucide-react";
 import { useToast } from "./ui/Toast";
 import { Toggle } from "./ui/toggle";
 import logger from "../utils/logger";
@@ -151,7 +151,7 @@ export default function DeveloperSection() {
           </div>
         </div>
 
-        {/* Log Path — only when active */}
+        {/* Log Path - only when active */}
         {debugEnabled && logPath && (
           <div className="px-5 py-4">
             <p className="text-xs font-medium text-muted-foreground/60 uppercase tracking-wider mb-2">
@@ -188,35 +188,36 @@ export default function DeveloperSection() {
         )}
       </div>
 
-      {/* What gets logged */}
+      {/* AKASHML: Privacy statement replaces the original "What gets logged" section.
+          Original section listed: Audio processing, API requests, FFmpeg operations,
+          System diagnostics, Transcription pipeline, Error details.
+          AKASHML_HIDDEN: to restore it, replace this block with the original
+          "What gets logged" div that used a grid of bullet items from i18n keys. */}
       <div>
         <div className="mb-5">
           <h3 className="text-[15px] font-semibold text-foreground tracking-tight">
-            {t("developerSection.whatGetsLogged.title")}
+            Privacy
           </h3>
         </div>
-        <div className="rounded-xl border border-border/60 dark:border-border-subtle bg-card dark:bg-surface-2">
-          <div className="px-5 py-4">
-            <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-              {[
-                t("developerSection.whatGetsLogged.items.audioProcessing"),
-                t("developerSection.whatGetsLogged.items.apiRequests"),
-                t("developerSection.whatGetsLogged.items.ffmpegOperations"),
-                t("developerSection.whatGetsLogged.items.systemDiagnostics"),
-                t("developerSection.whatGetsLogged.items.transcriptionPipeline"),
-                t("developerSection.whatGetsLogged.items.errorDetails"),
-              ].map((item) => (
-                <div key={item} className="flex items-center gap-2">
-                  <div className="h-1 w-1 rounded-full bg-muted-foreground/30 shrink-0" />
-                  <span className="text-xs text-muted-foreground">{item}</span>
-                </div>
-              ))}
+        <div className="rounded-xl border border-primary/20 bg-primary/5 dark:border-primary/15 dark:bg-primary/8">
+          <div className="px-5 py-4 flex items-start gap-3">
+            <Shield size={16} className="text-primary shrink-0 mt-0.5" />
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-foreground">
+                Akash is Decentralized, Permissionless and Open Source
+              </p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                We do not track anything. Your voice data, transcriptions and API keys stay on your device. Local transcription never leaves your machine. Cloud transcription is sent directly to your chosen AkashML endpoint - not through any intermediate server we control.
+              </p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Debug logs above are stored only on your local machine and are never uploaded anywhere automatically. You control if and when you share them.
+              </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Performance note — conditional */}
+      {/* Performance note - conditional */}
       {debugEnabled && (
         <div className="rounded-xl border border-warning/20 bg-warning/5 dark:bg-warning/10">
           <div className="px-5 py-4">
@@ -230,7 +231,7 @@ export default function DeveloperSection() {
         </div>
       )}
 
-      {/* Sharing instructions — conditional */}
+      {/* Sharing instructions - conditional */}
       {debugEnabled && (
         <div>
           <div className="mb-5">

@@ -36,7 +36,7 @@ import logger from "../utils/logger";
 // AKASHML_CLOUD_PROVIDER_TABS, then revert the related JSX changes.
 // ─────────────────────────────────────────────────────────────────────────────
 
-// AKASHML_HIDDEN_PROVIDERS original tabs, kept for future reference:
+// AKASHML_HIDDEN_PROVIDERS — original tabs, kept for future reference:
 // const CLOUD_PROVIDER_TABS = [
 //   { id: "openai", name: "OpenAI" },
 //   { id: "groq", name: "Groq", recommended: true },
@@ -51,7 +51,7 @@ const AKASHML_CLOUD_PROVIDER_TABS = [
 
 const VALID_CLOUD_PROVIDER_IDS = ["openai", "groq", "mistral", "custom"];
 
-// AKASHML.
+// AKASHML: renamed from "OpenAI Whisper" / "NVIDIA Parakeet" to feel provider-neutral.
 // AKASHML_HIDDEN_PROVIDERS: revert to original names if re-enabling multi-provider.
 const LOCAL_PROVIDER_TABS: Array<{ id: string; name: string; disabled?: boolean }> = [
   { id: "whisper", name: "Whisper (Local)" },
@@ -333,7 +333,7 @@ export default function TranscriptionModelPicker({
   //   const cloudProviderTabs = CLOUD_PROVIDER_TABS.map((provider) =>
   //     provider.id === "custom" ? { ...provider, name: t("transcription.customProvider") } : provider
   //   );
-  // AKASHML_HIDDEN_PROVIDERS restore the line above and remove the one below to re-enable all tabs.
+  // AKASHML_HIDDEN_PROVIDERS — restore the line above and remove the one below to re-enable all tabs.
   const cloudProviderTabs = AKASHML_CLOUD_PROVIDER_TABS;
 
   useEffect(() => {
@@ -393,10 +393,10 @@ export default function TranscriptionModelPicker({
   }, []);
 
   const ensureValidCloudSelection = useCallback(() => {
-    // AKASHML: Always force "custom" provider  no need to detect or fall back
+    // AKASHML: Always force "custom" provider — no need to detect or fall back
     // to other providers. The original multi-provider logic is preserved below.
     //
-    // AKASHML_HIDDEN_PROVIDERS  original logic to restore later:
+    // AKASHML_HIDDEN_PROVIDERS — original logic to restore later:
     // const isValidProvider = VALID_CLOUD_PROVIDER_IDS.includes(selectedCloudProvider);
     // if (!isValidProvider) {
     //   const knownProviderUrls = cloudProviders.map((p) => p.baseUrl);
@@ -547,7 +547,7 @@ export default function TranscriptionModelPicker({
   const handleCloudProviderChange = useCallback(
     (providerId: string) => {
       // AKASHML: Only "custom" is valid; ignore any other value passed in.
-      // AKASHML_HIDDEN_PROVIDERS restore full logic below to re-enable other providers:
+      // AKASHML_HIDDEN_PROVIDERS — restore full logic below to re-enable other providers:
       // onCloudProviderSelect(providerId);
       // const provider = cloudProviders.find((p) => p.id === providerId);
       // if (providerId === "custom") {
@@ -614,7 +614,7 @@ export default function TranscriptionModelPicker({
 
     // AKASHML: The block below that auto-switches provider based on a recognised
     // base URL is intentionally skipped — we always stay on "custom".
-    // AKASHML_HIDDEN_PROVIDERS restore if other providers are re-enabled:
+    // AKASHML_HIDDEN_PROVIDERS — restore if other providers are re-enabled:
     // if (normalized) {
     //   for (const provider of cloudProviders) {
     //     const providerNormalized = normalizeBaseUrl(provider.baseUrl);
@@ -843,9 +843,16 @@ export default function TranscriptionModelPicker({
 
   return (
     <div className={`space-y-2 ${className}`}>
-      <ModeToggle useLocalWhisper={useLocalWhisper} onModeChange={handleModeChange} />
+      {/*
+        AKASHML_HIDDEN_LOCAL: ModeToggle (Cloud/Local switch) removed.
+        Local Whisper and Parakeet tabs are hidden in this fork.
+        Restore by uncommenting this line and removing the hardcoded
+        cloud panel below:
+        <ModeToggle useLocalWhisper={useLocalWhisper} onModeChange={handleModeChange} />
+      */}
 
-      {!useLocalWhisper ? (
+      {/* AKASHML: Always show cloud panel - local mode hidden */}
+      {true ? (
         <div className={styles.container}>
           {/*
             AKASHML: The ProviderTabs row is rendered with only the single
@@ -872,7 +879,7 @@ export default function TranscriptionModelPicker({
             */}
             {selectedCloudProvider === "custom" ? (
               <div className="space-y-2">
-                {/* Akash Network info card */}
+                {/* Option C — Akash Network info card */}
                 <div className="rounded-md border border-primary/20 bg-primary/5 dark:border-primary/15 dark:bg-primary/8 px-3 py-2.5 flex items-start gap-2.5">
                   <Zap size={13} className="text-primary shrink-0 mt-0.5" />
                   <div className="min-w-0">
@@ -899,7 +906,7 @@ export default function TranscriptionModelPicker({
                   />
                 </div>
 
-                {/* API key is required for AkashML */}
+                {/* Fix 1 — removed "(Optional)" from label, API key is required for AkashML */}
                 <ApiKeyInput
                   apiKey={customTranscriptionApiKey}
                   setApiKey={setCustomTranscriptionApiKey || (() => {})}
@@ -921,7 +928,7 @@ export default function TranscriptionModelPicker({
                 </div>
               </div>
             ) : (
-              // AKASHML_HIDDEN_PROVIDERS  this branch is unreachable while only
+              // AKASHML_HIDDEN_PROVIDERS — this branch is unreachable while only
               // the "custom" tab is shown. Restore CLOUD_PROVIDER_TABS to make
               // openai/groq/mistral tabs visible and reach this code again.
               <div className="space-y-2">
@@ -973,7 +980,19 @@ export default function TranscriptionModelPicker({
             )}
           </div>
         </div>
-      ) : (
+      ) : null}
+
+      {/*
+        AKASHML_HIDDEN_LOCAL: Local model panel (Whisper/Parakeet) hidden.
+        Restore by reverting ModeToggle above and replacing the
+        {true ? ( ... ) : null} block with {!useLocalWhisper ? ( ... ) : (
+          <div className={styles.container}>
+            ... local panel JSX ...
+          </div>
+        )}
+
+        Original local panel preserved below for reference:
+
         <div className={styles.container}>
           <div className="p-2 pb-0">
             <ProviderTabs
@@ -983,86 +1002,9 @@ export default function TranscriptionModelPicker({
               colorScheme="purple"
             />
           </div>
-
-          {progressDisplay}
-
-          {cudaDownloading && internalLocalProvider === "whisper" && (
-            <div>
-              <DownloadProgressBar modelName="GPU acceleration" progress={cudaProgress} />
-              <div className="px-2.5 pb-1 flex justify-end">
-                <button
-                  onClick={handleCudaCancel}
-                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          )}
-
-          {internalLocalProvider === "whisper" &&
-            !cudaDismissed &&
-            !cudaDownloading &&
-            getCachedPlatform() !== "darwin" &&
-            cudaStatus?.gpuInfo.hasNvidiaGpu && (
-              <div className="mx-2 mt-2 rounded-md border border-border bg-surface-1 p-2.5">
-                {cudaStatus.downloaded ? (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5">
-                      <Check size={13} className="text-success" />
-                      <span className="text-xs font-medium text-foreground">{t("gpu.active")}</span>
-                    </div>
-                    <Button
-                      onClick={handleCudaDelete}
-                      size="sm"
-                      variant="ghost"
-                      className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
-                    >
-                      {t("gpu.remove")}
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex items-start gap-2.5">
-                    <Zap size={13} className="text-primary shrink-0 mt-0.5" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-foreground">
-                        {t("gpu.transcriptionBanner")}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1.5">
-                        <Button
-                          onClick={handleCudaDownload}
-                          size="sm"
-                          variant="default"
-                          className="h-6 px-2.5 text-xs"
-                        >
-                          {t("gpu.enableButton")}
-                        </Button>
-                        <button
-                          onClick={() => setCudaDismissed(true)}
-                          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          {t("gpu.dismiss")}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-          <div className="p-2">
-            {/* local compute messaging */}
-            <div className="mb-2 rounded-md border border-border/50 bg-muted/40 px-3 py-2 flex items-start gap-2">
-              <Lock size={11} className="text-muted-foreground shrink-0 mt-0.5" />
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
-                <span className="font-medium text-foreground">Running fully on your machine</span> — no cloud, no API key, completely private. Models are downloaded directly from their official open-source libraries and never leave your device.
-              </p>
-            </div>
-            {internalLocalProvider === "whisper" && renderLocalModels()}
-            {internalLocalProvider === "nvidia" && renderParakeetModels()}
-          </div>
+          ... cuda banners, model lists etc ...
         </div>
-      )}
+      */}
 
       <ConfirmDialog
         open={confirmDialog.open}

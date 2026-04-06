@@ -3,8 +3,9 @@ import {
   Home,
   NotebookPen,
   BookOpen,
-  Upload,
-  Blocks,
+  // AKASHML_HIDDEN: Upload and Blocks icons kept for when tabs are restored
+  // Upload,
+  // Blocks,
   Settings,
   HelpCircle,
   UserCircle,
@@ -72,9 +73,11 @@ export default function ControlPanelSidebar({
   }[] = [
     { id: "home", label: t("sidebar.home"), icon: Home },
     { id: "personal-notes", label: t("sidebar.notes"), icon: NotebookPen },
-    { id: "upload", label: t("sidebar.upload"), icon: Upload },
+    // AKASHML_HIDDEN: Upload and Integrations tabs hidden for now.
+    // Restore by uncommenting these two lines:
+    // { id: "upload", label: t("sidebar.upload"), icon: Upload },
+    // { id: "integrations", label: t("sidebar.integrations"), icon: Blocks },
     { id: "dictionary", label: t("sidebar.dictionary"), icon: BookOpen },
-    { id: "integrations", label: t("sidebar.integrations"), icon: Blocks },
   ];
 
   return (
