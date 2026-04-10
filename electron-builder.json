@@ -1,6 +1,6 @@
 {
-  "appId": "network.akash.akashscribe",
-  "productName": "Akash Scribe",
+  "appId": "network.akash.akashecho",
+  "productName": "Akash Echo",
   "protocols": {
     "name": "OpenWhispr Protocol",
     "schemes": ["openwhispr"]
@@ -122,9 +122,9 @@
     "notarize": true,
     "extendInfo": {
       "LSUIElement": false,
-      "NSMicrophoneUsageDescription": "OpenWhispr uses the microphone to capture your voice for transcription.",
-      "NSAudioCaptureUsageDescription": "OpenWhispr uses system audio to capture other participants' audio from calls and meetings. Your screen is never recorded.",
-      "NSAccessibilityUsageDescription": "OpenWhispr needs accessibility permissions to paste transcribed text into other applications."
+      "NSMicrophoneUsageDescription": "Akash Echo uses the microphone to capture your voice for transcription.",
+      "NSAudioCaptureUsageDescription": "Akash Echo uses system audio to capture other participants' audio from calls and meetings. Your screen is never recorded.",
+      "NSAccessibilityUsageDescription": "Akash Echo needs accessibility permissions to paste transcribed text into other applications."
     }
   },
   "win": {
@@ -199,7 +199,7 @@
     "include": "resources/nsis/cleanup-models.nsh"
   },
   "dmg": {
-    "title": "OpenWhispr",
+    "title": "Akash Echo",
     "icon": "src/assets/icon.icns",
     "window": {
       "width": 540,
@@ -208,8 +208,8 @@
   },
   "publish": {
     "provider": "github",
-    "owner": "OpenWhispr",
-    "repo": "openwhispr",
+    "owner": "rodri-r",
+    "repo": "akash-echo",
     "private": false,
     "releaseType": "draft"
   }
