@@ -1,6 +1,6 @@
 {
-  "appId": "network.akash.akashecho",
-  "productName": "Akash Echo",
+  "appId": "network.akash.akashscribe",
+  "productName": "Akash Scribe",
   "protocols": {
     "name": "OpenWhispr Protocol",
     "schemes": ["openwhispr"]
@@ -118,13 +118,12 @@
     "hardenedRuntime": true,
     "entitlements": "resources/mac/entitlements.mac.plist",
     "entitlementsInherit": "resources/mac/entitlements.mac.plist",
-    "identity": "HeroTools Inc. (9R85XFMH59)",
     "notarize": true,
     "extendInfo": {
       "LSUIElement": false,
-      "NSMicrophoneUsageDescription": "Akash Echo uses the microphone to capture your voice for transcription.",
-      "NSAudioCaptureUsageDescription": "Akash Echo uses system audio to capture other participants' audio from calls and meetings. Your screen is never recorded.",
-      "NSAccessibilityUsageDescription": "Akash Echo needs accessibility permissions to paste transcribed text into other applications."
+      "NSMicrophoneUsageDescription": "Akash Scribe uses the microphone to capture your voice for transcription.",
+      "NSAudioCaptureUsageDescription": "Akash Scribe uses system audio to capture other participants' audio from calls and meetings. Your screen is never recorded.",
+      "NSAccessibilityUsageDescription": "Akash Scribe needs accessibility permissions to paste transcribed text into other applications."
     }
   },
   "win": {
@@ -199,7 +198,7 @@
     "include": "resources/nsis/cleanup-models.nsh"
   },
   "dmg": {
-    "title": "Akash Echo",
+    "title": "Akash Scribe",
     "icon": "src/assets/icon.icns",
     "window": {
       "width": 540,
@@ -209,7 +208,7 @@
   "publish": {
     "provider": "github",
     "owner": "rodri-r",
-    "repo": "akash-echo",
+    "repo": "akash-scribe",
     "private": false,
     "releaseType": "draft"
   }

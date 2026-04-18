@@ -1,6 +1,6 @@
 {
-  "name": "akash-echo",
-  "version": "0.0.4",
+  "name": "akash-scribe",
+  "version": "0.0.3",
   "description": "A desktop dictation application that uses Akash ML for speech-to-text transcription",
   "main": "main.js",
   "private": true,
