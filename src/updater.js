@@ -30,8 +30,8 @@ class UpdateManager {
     // Configure auto-updater for GitHub releases
     autoUpdater.setFeedURL({
       provider: "github",
-      owner: "OpenWhispr",
-      repo: "openwhispr",
+      owner: "rodri-r",
+      repo: "akash-scribe",
       private: false,
     });
 
@@ -54,11 +54,11 @@ class UpdateManager {
             timeout: 3000,
           }).trim();
           if (translated === "1") {
-            console.log("🔄 Rosetta detected — switching update channel to arm64");
+            console.log("Rosetta detected - switching update channel to arm64");
             nativeArch = "arm64";
           }
         } catch {
-          // sysctl.proc_translated doesn't exist on real Intel Macs — ignore
+          // sysctl.proc_translated doesn't exist on real Intel Macs - ignore
         }
       }
 
@@ -105,18 +105,18 @@ class UpdateManager {
         this.notifyRenderers("update-not-available", info);
       },
       error: (err) => {
-        console.error("❌ Auto-updater error:", err);
+        console.error("Auto-updater error:", err);
         this.isDownloading = false;
         this.notifyRenderers("update-error", err);
       },
       "download-progress": (progressObj) => {
         console.log(
-          `📥 Download progress: ${progressObj.percent.toFixed(2)}% (${(progressObj.transferred / 1024 / 1024).toFixed(2)}MB / ${(progressObj.total / 1024 / 1024).toFixed(2)}MB)`
+          `Download progress: ${progressObj.percent.toFixed(2)}% (${(progressObj.transferred / 1024 / 1024).toFixed(2)}MB / ${(progressObj.total / 1024 / 1024).toFixed(2)}MB)`
         );
         this.notifyRenderers("update-download-progress", progressObj);
       },
       "update-downloaded": (info) => {
-        console.log("✅ Update downloaded successfully:", info?.version);
+        console.log("Update downloaded successfully:", info?.version);
         this.updateDownloaded = true;
         this.isDownloading = false;
         if (info) {
@@ -160,15 +160,11 @@ class UpdateManager {
         };
       }
 
-      console.log("🔍 Checking for updates...");
+      console.log("Checking for updates...");
       const result = await autoUpdater.checkForUpdates();
 
       if (result?.isUpdateAvailable && result?.updateInfo) {
-        console.log("📋 Update available:", result.updateInfo.version);
-        console.log(
-          "📦 Download size:",
-          result.updateInfo.files?.map((f) => `${(f.size / 1024 / 1024).toFixed(2)}MB`).join(", ")
-        );
+        console.log("Update available:", result.updateInfo.version);
         return {
           updateAvailable: true,
           version: result.updateInfo.version,
@@ -177,14 +173,14 @@ class UpdateManager {
           releaseNotes: result.updateInfo.releaseNotes,
         };
       } else {
-        console.log("✅ Already on latest version");
+        console.log("Already on latest version");
         return {
           updateAvailable: false,
           message: "You are running the latest version",
         };
       }
     } catch (error) {
-      console.error("❌ Update check error:", error);
+      console.error("Update check error:", error);
       throw error;
     }
   }
@@ -213,14 +209,14 @@ class UpdateManager {
       }
 
       this.isDownloading = true;
-      console.log("📥 Starting update download...");
+      console.log("Starting update download...");
       await autoUpdater.downloadUpdate();
-      console.log("📥 Download initiated successfully");
+      console.log("Download initiated successfully");
 
       return { success: true, message: "Update download started" };
     } catch (error) {
       this.isDownloading = false;
-      console.error("❌ Update download error:", error);
+      console.error("Update download error:", error);
       throw error;
     }
   }
@@ -249,7 +245,7 @@ class UpdateManager {
       }
 
       this.isInstalling = true;
-      console.log("🔄 Installing update and restarting...");
+      console.log("Installing update and restarting...");
 
       const { app, BrowserWindow } = require("electron");
 
@@ -266,7 +262,7 @@ class UpdateManager {
       return { success: true, message: "Update installation started" };
     } catch (error) {
       this.isInstalling = false;
-      console.error("❌ Update installation error:", error);
+      console.error("Update installation error:", error);
       throw error;
     }
   }
@@ -276,7 +272,7 @@ class UpdateManager {
       const { app } = require("electron");
       return { version: app.getVersion() };
     } catch (error) {
-      console.error("❌ Error getting app version:", error);
+      console.error("Error getting app version:", error);
       throw error;
     }
   }
@@ -289,7 +285,7 @@ class UpdateManager {
         isDevelopment: process.env.NODE_ENV === "development",
       };
     } catch (error) {
-      console.error("❌ Error getting update status:", error);
+      console.error("Error getting update status:", error);
       throw error;
     }
   }
@@ -298,15 +294,22 @@ class UpdateManager {
     try {
       return this.lastUpdateInfo;
     } catch (error) {
-      console.error("❌ Error getting update info:", error);
+      console.error("Error getting update info:", error);
       throw error;
     }
   }
 
   checkForUpdatesOnStartup() {
+    // AKASHML: Background update check disabled until we publish our own
+    // GitHub releases. The updater is fully set up and will work once
+    // releases exist at github.com/rodri-r/akash-scribe/releases.
+    // To re-enable: remove this return statement.
+    return;
+
+    // eslint-disable-next-line no-unreachable
     if (process.env.NODE_ENV !== "development") {
       setTimeout(() => {
-        console.log("🔄 Checking for updates on startup...");
+        console.log("Checking for updates on startup...");
         autoUpdater.checkForUpdates().catch((err) => {
           console.error("Startup update check failed:", err);
         });
@@ -314,7 +317,7 @@ class UpdateManager {
 
       const FOUR_HOURS_MS = 4 * 60 * 60 * 1000;
       this.updateCheckInterval = setInterval(() => {
-        console.log("🔄 Periodic update check...");
+        console.log("Periodic update check...");
         autoUpdater.checkForUpdates().catch((err) => {
           console.error("Periodic update check failed:", err);
         });

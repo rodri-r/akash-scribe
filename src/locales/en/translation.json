@@ -4,7 +4,7 @@
       "sectionTitle": "Language",
       "sectionDescription": "Set interface and transcription languages independently",
       "uiLabel": "Interface language",
-      "uiDescription": "Choose the language used throughout OpenWhispr's interface",
+      "uiDescription": "Choose the language used throughout Akash Scribe's interface",
       "transcriptionLabel": "Transcription language",
       "transcriptionDescription": "Choose the language you speak for more accurate transcription"
     }
@@ -158,7 +158,7 @@
       "accessibilityTitle": "Accessibility",
       "accessibilityDescription": "Enable in System Settings by toggling it on",
       "testAndGrant": "Test & Grant",
-      "requiredForApp": "Required for OpenWhispr to work",
+      "requiredForApp": "Required for Akash Scribe to work",
       "microphoneRequired": "Microphone access required",
       "openSystemSettings": "Open System Settings",
       "screenRecordingTitle": "System Audio",
@@ -410,7 +410,7 @@
       "micErrors": {
         "accessFailed": "Microphone access failed. Please try again.",
         "noMicrophones": "No microphones were detected. Connect or select a microphone in {{settingsPath}}.",
-        "permissionDenied": "Permission was denied. Open {{privacyPath}} and allow OpenWhispr.",
+        "permissionDenied": "Permission was denied. Open {{privacyPath}} and allow Akash Scribe.",
         "couldNotStart": "Could not start the selected microphone. Choose an input device in {{settingsPath}}, then rerun the test.",
         "noActiveInput": "No active audio input was found. Pick a microphone in {{settingsPath}}.",
         "unknown": "Microphone access failed: {{error}}. Select a different input device and try again.",
@@ -1099,12 +1099,12 @@
       "description": "Clean up transcriptions, handle commands, and fix errors while preserving your tone.",
       "enableTextCleanup": "Enable text cleanup",
       "enableTextCleanupDescription": "AI improves transcription quality",
-      "openwhisprCloud": "OpenWhispr Cloud",
+      "openwhisprCloud": "Akash Scribe Cloud",
       "openwhisprCloudDescription": "Just works. No configuration needed.",
       "title": "AI Text Enhancement",
       "toasts": {
         "switchedCloud": {
-          "description": "Text enhancement will use OpenWhispr's cloud service.",
+          "description": "Text enhancement will use Akash Scribe cloud service.",
           "title": "Switched to Akash Scribe Cloud"
         },
         "switchedCustom": {
@@ -1332,7 +1332,7 @@
     "permissions": {
       "accessibilityDescription": "Required for auto-paste to work after transcription",
       "accessibilityTitle": "Accessibility",
-      "description": "Test and manage system permissions required for OpenWhispr to function correctly",
+      "description": "Test and manage system permissions required for Akash Scribe to function correctly",
       "microphoneDescription": "Captures your voice for dictation and transcription",
       "microphoneTitle": "Microphone",
       "resetAccessibility": {
@@ -1647,7 +1647,7 @@
       "byokTooLarge": "Third-party API keys only support files up to 25 MB.",
       "byokTooLargeDetail": "For files over 25 MB, Akash Scribe Cloud handles splitting, parallel processing, and reassembly — so you get reliable results without depending on third-party provider limits.",
       "byokTooLargeNeedsAccount": "Create an account and upgrade to a paid plan to transcribe larger files with Akash Scribe Cloud.",
-      "byokTooLargeNeedsUpgrade": "Upgrade to a paid plan to transcribe larger files with OpenWhispr Cloud.",
+      "byokTooLargeNeedsUpgrade": "Upgrade to a paid plan to transcribe larger files with Akash Scribe Cloud.",
       "switchToCloudForLargeFiles": "Switch to Akash Scribe Cloud to transcribe this file.",
       "createAccount": "Create Account",
       "upgrade": "Upgrade",
