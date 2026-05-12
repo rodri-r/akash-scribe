@@ -4,7 +4,7 @@
       "sectionTitle": "Language",
       "sectionDescription": "Set interface and transcription languages independently",
       "uiLabel": "Interface language",
-      "uiDescription": "Choose the language used throughout Akash Scribe's interface",
+      "uiDescription": "Choose the language used throughout Scribe's interface",
       "transcriptionLabel": "Transcription language",
       "transcriptionDescription": "Choose the language you speak for more accurate transcription"
     }
@@ -15,12 +15,12 @@
       "hide": "Hide Dictation Panel"
     },
     "openControlPanel": "Open Control Panel",
-    "quit": "Quit Akash Scribe",
-    "tooltip": "Akash Scribe - Voice Dictation"
+    "quit": "Quit Scribe",
+    "tooltip": "Scribe - Voice Dictation"
   },
   "menu": {
-    "appLabel": "Akash Scribe",
-    "quit": "Quit Akash Scribe",
+    "appLabel": "Scribe",
+    "quit": "Quit Scribe",
     "speech": "Speech",
     "help": "Help",
     "learnMore": "Learn More",
@@ -38,8 +38,8 @@
       "message": "Failed to open the link in your browser:\n{{url}}\n\nError: {{error}}"
     },
     "loadFailure": {
-      "title": "Akash Scribe failed to load",
-      "message": "Akash Scribe could not load its UI.",
+      "title": "Scribe failed to load",
+      "message": "Scribe could not load its UI.",
       "detail": {
         "window": "Window: {{windowName}}",
         "error": "Error {{errorCode}}: {{errorDescription}}",
@@ -50,17 +50,17 @@
   },
   "startup": {
     "error": {
-      "title": "Akash Scribe Startup Error",
+      "title": "Scribe Startup Error",
       "message": "Failed to start the application:\n\n{{error}}\n\nPlease report this issue."
     },
     "globeHotkey": {
       "title": "Globe Hotkey Unavailable",
-      "message": "Akash Scribe could not activate the Globe key hotkey.",
+      "message": "Scribe could not activate the Globe key hotkey.",
       "details": {
         "unknown": "Unknown error occurred while starting the Globe listener.",
         "fallback": "The Globe key shortcut will remain disabled; existing keyboard shortcuts continue to work.",
         "devHint": "Run `npm run compile:globe` and rebuild the app to regenerate the listener binary.",
-        "reinstallHint": "Try reinstalling Akash Scribe or contact support if the issue persists."
+        "reinstallHint": "Try reinstalling Scribe or contact support if the issue persists."
       }
     }
   },
@@ -80,9 +80,9 @@
     "accessibility": "Accessibility settings are not available on this platform."
   },
   "titleBar": {
-    "quitTitle": "Quit Akash Scribe",
-    "quitConfirmTitle": "Quit Akash Scribe?",
-    "quitConfirmDescription": "This will close Akash Scribe and stop background processes.",
+    "quitTitle": "Quit Scribe",
+    "quitConfirmTitle": "Quit Scribe?",
+    "quitConfirmDescription": "This will close Scribe and stop background processes.",
     "quit": "Quit",
     "cancel": "Cancel"
   },
@@ -158,7 +158,7 @@
       "accessibilityTitle": "Accessibility",
       "accessibilityDescription": "Enable in System Settings by toggling it on",
       "testAndGrant": "Test & Grant",
-      "requiredForApp": "Required for Akash Scribe to work",
+      "requiredForApp": "Required for Scribe to work",
       "microphoneRequired": "Microphone access required",
       "openSystemSettings": "Open System Settings",
       "screenRecordingTitle": "System Audio",
@@ -190,7 +190,7 @@
       "problemTitle": "Update ran into a problem",
       "problemDescription": "We couldn't complete the update. Please try again later.",
       "installTitle": "Install Update",
-      "installDescription": "Akash Scribe will restart to apply the update. Any in-progress work will be saved.",
+      "installDescription": "Scribe will restart to apply the update. Any in-progress work will be saved.",
       "couldNotInstallTitle": "Couldn't install update",
       "couldNotInstallDescription": "Something went wrong. Please try again.",
       "couldNotDownloadTitle": "Couldn't download update",
@@ -205,7 +205,7 @@
     },
     "accessibilityMissing": {
       "title": "Accessibility permissions needed",
-      "description": "We've detected that Akash Scribe needs accessibility permissions to work properly. Please enable them below."
+      "description": "We've detected that Scribe needs accessibility permissions to work properly. Please enable them below."
     },
     "billing": {
       "pastDueTitle": "We couldn't process your payment",
@@ -257,8 +257,8 @@
       "clearAllErrorDescription": "Something went wrong. Please try again."
     },
     "cloudMigration": {
-      "title": "Welcome to Akash Scribe Pro",
-      "description": "Your 7-day free trial is active! We've switched your transcription to Akash Scribe Cloud for faster, more accurate results. Your previous settings are saved - switch back anytime in Settings.",
+      "title": "Welcome to Scribe Pro",
+      "description": "Your 7-day free trial is active! We've switched your transcription to Scribe Cloud for faster, more accurate results. Your previous settings are saved - switch back anytime in Settings.",
       "viewSettings": "View Settings"
     },
     "aiCta": {
@@ -410,7 +410,7 @@
       "micErrors": {
         "accessFailed": "Microphone access failed. Please try again.",
         "noMicrophones": "No microphones were detected. Connect or select a microphone in {{settingsPath}}.",
-        "permissionDenied": "Permission was denied. Open {{privacyPath}} and allow Akash Scribe.",
+        "permissionDenied": "Permission was denied. Open {{privacyPath}} and allow Scribe.",
         "couldNotStart": "Could not start the selected microphone. Choose an input device in {{settingsPath}}, then rerun the test.",
         "noActiveInput": "No active audio input was found. Pick a microphone in {{settingsPath}}.",
         "unknown": "Microphone access failed: {{error}}. Select a different input device and try again.",
@@ -439,8 +439,8 @@
         "accessibilityNeeded": "Please grant accessibility permissions in System Settings to enable automatic text pasting.",
         "windowsReady": "Windows does not require special permissions for automatic pasting. You're all set!",
         "linuxReadyWithMethod": "Automatic pasting is available using {{method}}. You are all set!",
-        "waylandClipboardMode": "Automatic pasting is not available on this Wayland session. Akash Scribe will copy text to your clipboard and you can paste with Ctrl+V.",
-        "optionalPasteTool": "For automatic pasting, install {{tool}}:\n\n{{installCmd}}{{waylandNote}}\n\nWithout this, you can still use Akash Scribe - text will be copied to your clipboard and you can paste with Ctrl+V."
+        "waylandClipboardMode": "Automatic pasting is not available on this Wayland session. Scribe will copy text to your clipboard and you can paste with Ctrl+V.",
+        "optionalPasteTool": "For automatic pasting, install {{tool}}:\n\n{{installCmd}}{{waylandNote}}\n\nWithout this, you can still use Scribe - text will be copied to your clipboard and you can paste with Ctrl+V."
       },
       "alerts": {
         "accessibilityNeeded": "Accessibility permissions needed! Please grant them in System Settings."
@@ -453,7 +453,7 @@
         "defaultPasteTool": "xdotool",
         "xdotoolXwayland": "xdotool (XWayland apps)"
       },
-      "accessibilityTestText": "Akash Scribe accessibility test",
+      "accessibilityTestText": "Scribe accessibility test",
       "warning": {
         "messages": {
           "macos": "Check Sound settings to select your input device",
@@ -523,7 +523,7 @@
       "continueWithGoogle": "Continue with Google"
     },
     "welcomeSubtitle": "Dictate anywhere using your voice",
-    "welcomeTitle": "Welcome to Akash Scribe",
+    "welcomeTitle": "Welcome to Scribe",
     "sessionExpired": "Session expired. Please restart the sign-up process."
   },
   "calendar": {
@@ -771,10 +771,10 @@
     "recheckChecking": "Checking...",
     "title": "Automatic Pasting",
     "usingMethodPrefix": "Using",
-    "waylandClipboardDescription": "Automatic pasting isn't available on this Wayland session. Akash Scribe will copy text to your clipboard so you can paste manually with Ctrl+V.",
+    "waylandClipboardDescription": "Automatic pasting isn't available on this Wayland session. Scribe will copy text to your clipboard so you can paste manually with Ctrl+V.",
     "waylandClipboardTitle": "Clipboard Mode on Wayland",
     "windowsReady": "Windows supports automatic pasting out of the box. No setup required!",
-    "withoutToolPrefix": "Without this tool, Akash Scribe will copy text to your clipboard. You can then paste manually with Ctrl+V.",
+    "withoutToolPrefix": "Without this tool, Scribe will copy text to your clipboard. You can then paste manually with Ctrl+V.",
     "xwaylandAppsOnly": "automatic pasting works for XWayland apps only"
   },
   "promptStudio": {
@@ -824,7 +824,7 @@
       "none": "None",
       "outputLabel": "Output",
       "processing": "Processing...",
-      "openwhisprCloud": "Akash Scribe Cloud",
+      "openwhisprCloud": "Scribe Cloud",
       "providerLabel": "Provider",
       "run": "Run Test",
       "customEndpoint": "Custom endpoint"
@@ -1099,13 +1099,13 @@
       "description": "Clean up transcriptions, handle commands, and fix errors while preserving your tone.",
       "enableTextCleanup": "Enable text cleanup",
       "enableTextCleanupDescription": "AI improves transcription quality",
-      "openwhisprCloud": "Akash Scribe Cloud",
+      "openwhisprCloud": "Scribe Cloud",
       "openwhisprCloudDescription": "Just works. No configuration needed.",
       "title": "AI Text Enhancement",
       "toasts": {
         "switchedCloud": {
-          "description": "Text enhancement will use Akash Scribe cloud service.",
-          "title": "Switched to Akash Scribe Cloud"
+          "description": "Text enhancement will use Scribe cloud service.",
+          "title": "Switched to Scribe Cloud"
         },
         "switchedCustom": {
           "description": "Configure your own provider and API key.",
@@ -1168,7 +1168,7 @@
       "appearance": {
         "auto": "Auto",
         "dark": "Dark",
-        "description": "Control how Akash Scribe looks",
+        "description": "Control how Scribe looks",
         "light": "Light",
         "theme": "Theme",
         "themeDescription": "Choose light, dark, or match your system",
@@ -1209,9 +1209,9 @@
       },
       "startup": {
         "launchAtLogin": "Launch at login",
-        "launchAtLoginDescription": "Start Akash Scribe automatically when you log in",
+        "launchAtLoginDescription": "Start Scribe automatically when you log in",
         "title": "Startup",
-        "description": "Control how Akash Scribe behaves when it launches",
+        "description": "Control how Scribe behaves when it launches",
         "startMinimized": "Start minimized",
         "startMinimizedDescription": "Launch without showing the control panel window"
       },
@@ -1257,7 +1257,7 @@
           "group": {
             "step1Title": "Add your user to the input group",
             "step2Title": "Log out and back in",
-            "step2Desc": "Group changes only take effect after a new login session. Log out of your desktop and log back in, then reopen Akash Scribe."
+            "step2Desc": "Group changes only take effect after a new login session. Log out of your desktop and log back in, then reopen Scribe."
           },
           "service": {
             "step1Title": "Create the service directory",
@@ -1301,7 +1301,7 @@
           },
           "installUpdate": {
             "confirmText": "Install & Restart",
-            "description": "Akash Scribe will restart to apply the update.",
+            "description": "Scribe will restart to apply the update.",
             "title": "Install Update"
           },
           "noUpdates": {
@@ -1332,13 +1332,13 @@
     "permissions": {
       "accessibilityDescription": "Required for auto-paste to work after transcription",
       "accessibilityTitle": "Accessibility",
-      "description": "Test and manage system permissions required for Akash Scribe to function correctly",
+      "description": "Test and manage system permissions required for Scribe to function correctly",
       "microphoneDescription": "Captures your voice for dictation and transcription",
       "microphoneTitle": "Microphone",
       "resetAccessibility": {
-        "description": "This will remove Akash Scribe from accessibility permissions. You'll need to re-grant access in System Settings > Privacy & Security > Accessibility.",
+        "description": "This will remove Scribe from accessibility permissions. You'll need to re-grant access in System Settings > Privacy & Security > Accessibility.",
         "label": "Reset accessibility permissions",
-        "rowDescription": "Fix issues after reinstalling or rebuilding the app by removing and re-adding Akash Scribe in System Settings",
+        "rowDescription": "Fix issues after reinstalling or rebuilding the app by removing and re-adding Scribe in System Settings",
         "title": "Reset Accessibility Permissions"
       },
       "optional": "Optional",
@@ -1358,7 +1358,7 @@
       "description": "Control what data leaves your device. Everything is off by default.",
       "title": "Privacy",
       "usageAnalytics": "Usage analytics",
-      "usageAnalyticsDescription": "Help us improve Akash Scribe by sharing anonymous performance metrics. We never send transcription content — only timing and error data.",
+      "usageAnalyticsDescription": "Help us improve Scribe by sharing anonymous performance metrics. We never send transcription content — only timing and error data.",
       "audioRetention": "Audio Retention",
       "audioRetentionDescription": "Store audio recordings locally for re-transcription and download. Files are automatically deleted after the retention period.",
       "audioRetentionDisabled": "Disabled",
@@ -1377,14 +1377,14 @@
     "transcription": {
       "customSetup": "Custom Setup",
       "customSetupDescription": "Use your own provider and API key.",
-      "description": "Choose how Akash Scribe transcribes your voice",
-      "openwhisprCloud": "Akash Scribe Cloud",
+      "description": "Choose how Scribe transcribes your voice",
+      "openwhisprCloud": "Scribe Cloud",
       "openwhisprCloudDescription": "Just works. No configuration needed.",
       "title": "Speech to Text",
       "toasts": {
         "switchedCloud": {
-          "description": "Transcription will use Akash Scribe's cloud service.",
-          "title": "Switched to Akash Scribe Cloud"
+          "description": "Transcription will use Scribe's cloud service.",
+          "title": "Switched to Scribe Cloud"
         },
         "switchedCustom": {
           "description": "Configure your own provider and API key.",
@@ -1544,7 +1544,7 @@
     },
     "tryAgain": "Try Again",
     "card": {
-      "brand": "Akash Scribe",
+      "brand": "Scribe",
       "signalId": "Signal ID",
       "audioSignature": "Your audio signature",
       "stop": "Stop",
@@ -1632,7 +1632,7 @@
       "setupTitle": "Set up transcription",
       "setupDescription": "Choose how to transcribe your audio. This also applies to live dictation.",
       "continue": "Continue",
-      "openwhisprCloud": "Akash Scribe Cloud",
+      "openwhisprCloud": "Scribe Cloud",
       "custom": "Custom",
       "selectFolder": "Select folder",
       "transcriptionFailed": "Transcription failed",
@@ -1641,17 +1641,17 @@
       "noProviderDescription": "Add an API key or download a local model to start transcribing.",
       "noProviderAction": "Open Transcription Settings",
       "fileTooLarge": "This file exceeds the 500 MB limit.",
-      "paidPlanRequired": "Cloud transcription for files over 25 MB requires a paid plan. Large files are processed with Akash Scribe Cloud for reliable, high-quality results.",
+      "paidPlanRequired": "Cloud transcription for files over 25 MB requires a paid plan. Large files are processed with Scribe Cloud for reliable, high-quality results.",
       "largeFileNote": "Large files are split and transcribed in parallel.",
       "chunkProgress": "Transcribing part {{completed}} of {{total}}...",
       "byokTooLarge": "Third-party API keys only support files up to 25 MB.",
-      "byokTooLargeDetail": "For files over 25 MB, Akash Scribe Cloud handles splitting, parallel processing, and reassembly — so you get reliable results without depending on third-party provider limits.",
-      "byokTooLargeNeedsAccount": "Create an account and upgrade to a paid plan to transcribe larger files with Akash Scribe Cloud.",
-      "byokTooLargeNeedsUpgrade": "Upgrade to a paid plan to transcribe larger files with Akash Scribe Cloud.",
-      "switchToCloudForLargeFiles": "Switch to Akash Scribe Cloud to transcribe this file.",
+      "byokTooLargeDetail": "For files over 25 MB, Scribe Cloud handles splitting, parallel processing, and reassembly — so you get reliable results without depending on third-party provider limits.",
+      "byokTooLargeNeedsAccount": "Create an account and upgrade to a paid plan to transcribe larger files with Scribe Cloud.",
+      "byokTooLargeNeedsUpgrade": "Upgrade to a paid plan to transcribe larger files with Scribe Cloud.",
+      "switchToCloudForLargeFiles": "Switch to Scribe Cloud to transcribe this file.",
       "createAccount": "Create Account",
       "upgrade": "Upgrade",
-      "switchToCloud": "Akash Scribe Cloud"
+      "switchToCloud": "Scribe Cloud"
     },
     "meeting": {
       "title": "Meeting Notes",
@@ -1795,7 +1795,7 @@
       "undo": "Undo",
       "accessibilityMissing": {
         "title": "Accessibility permissions required",
-        "description": "Akash Scribe needs accessibility permissions to detect your hotkey and paste text. Please enable them in the Control Panel."
+        "description": "Scribe needs accessibility permissions to detect your hotkey and paste text. Please enable them in the Control Panel."
       }
     },
     "mic": {
@@ -1831,8 +1831,8 @@
       "systemPrompt": "System Prompt",
       "systemPromptDescription": "Custom instructions for the agent",
       "systemPromptPlaceholder": "Enter custom system prompt...",
-      "openwhisprCloud": "Akash Scribe Cloud",
-      "openwhisprCloudDescription": "Use Akash Scribe's cloud AI for agent conversations",
+      "openwhisprCloud": "Scribe Cloud",
+      "openwhisprCloudDescription": "Use Scribe's cloud AI for agent conversations",
       "customSetup": "Custom Setup (BYOK)",
       "customSetupDescription": "Use your own API keys and choose your preferred model"
     },
@@ -1874,7 +1874,7 @@
       "disconnectConfirm": "Disconnect {{email}}?",
       "disconnectDescription": "Meeting notes will no longer be recorded from this calendar.",
       "screenRecordingRequired": "System Audio Permission Required",
-      "screenRecordingDescription": "To transcribe meetings, Akash Scribe needs the System Audio permission to capture other participants' audio. We never record your screen. You'll be taken to System Settings to enable it.",
+      "screenRecordingDescription": "To transcribe meetings, Scribe needs the System Audio permission to capture other participants' audio. We never record your screen. You'll be taken to System Settings to enable it.",
       "openSettings": "Open System Settings"
     },
     "plan": {
@@ -1896,8 +1896,8 @@
       "feedback": "Need more than 20 hours? Contact support@akash.network"
     },
     "notABot": {
-      "title": "Akash Scribe is a meeting recorder, not a bot",
-      "description": "Akash Scribe captures audio directly from your system — it never joins your meetings as a participant. Just connect your calendar and take notes as normal."
+      "title": "Scribe is a meeting recorder, not a bot",
+      "description": "Scribe captures audio directly from your system — it never joins your meetings as a participant. Just connect your calendar and take notes as normal."
     }
   },
   "upcoming": {
@@ -1914,7 +1914,7 @@
     "signInDescription": "Create an account or sign in to record and transcribe meetings.",
     "connectCalendar": "Connect your calendar",
     "connectCalendarDescription": "Link your Google Calendar to see upcoming meetings and automatically record notes.",
-    "notABot": "Akash Scribe records using your system audio — it never joins meetings as a bot.",
+    "notABot": "Scribe records using your system audio — it never joins meetings as a bot.",
     "connectCalendarButton": "Connect Calendar"
   },
   "notesView": {

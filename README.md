@@ -123,7 +123,7 @@ DEBUG=false
 
 ### Local Whisper Setup
 
-For local processing, Akash Scribe uses OpenAI's Whisper model via whisper.cpp - a high-performance C++ implementation:
+For local processing, Scribe uses OpenAI's Whisper model via whisper.cpp - a high-performance C++ implementation:
 
 1. **Bundled Binary**: whisper.cpp is bundled with the app for all platforms
 2. **GGML Models**: Downloads optimized GGML models on first use to `~/.cache/akash-scribe/whisper-models/`
@@ -144,7 +144,7 @@ For local processing, Akash Scribe uses OpenAI's Whisper model via whisper.cpp -
 
 ### Local Parakeet Setup (Alternative)
 
-Akash Scribe also supports NVIDIA Parakeet models via sherpa-onnx - a fast alternative to Whisper:
+Scribe also supports NVIDIA Parakeet models via sherpa-onnx - a fast alternative to Whisper:
 
 1. **Bundled Binary**: sherpa-onnx is bundled with the app for all platforms
 2. **INT8 Quantized Models**: Efficient CPU inference
@@ -188,7 +188,7 @@ We welcome contributions! Please follow these steps:
 
 ## Security
 
-Akash Scribe is designed with privacy and security in mind:
+Scribe is designed with privacy and security in mind:
 
 - **Local Processing Option**: Keep your voice data completely private
 - **No Analytics**: We don't collect any usage data or telemetry
@@ -205,7 +205,7 @@ Akash Scribe is designed with privacy and security in mind:
 1. **Microphone permissions**: Grant permissions in System Preferences/Settings
 2. **Accessibility permissions (macOS)**: Required for automatic text pasting
    - Go to System Settings → Privacy & Security → Accessibility
-   - Add Akash Scribe and enable the checkbox
+   - Add Scribe and enable the checkbox
    - Use "Fix Permission Issues" in Control Panel if needed
 3. **API key errors** (cloud processing only): Ensure your API key is valid and has credits
    - Set key through Control Panel or .env file
@@ -248,8 +248,8 @@ Akash Scribe is designed with privacy and security in mind:
 
 ## FAQ
 
-**Q: Is Akash Scribe really free?**
-A: Yes! Akash Scribe is open source and free to use. The free plan includes 60 minutes/month of cloud transcription, and local processing is completely free with no limits. Pro plans offer unlimited transcription.
+**Q: Is Scribe really free?**
+A: Yes! Scribe is open source and free to use. The free plan includes 60 minutes/month of cloud transcription, and local processing is completely free with no limits. Pro plans offer unlimited transcription.
 
 **Q: Which processing method should I use?**
 A: Use local processing for privacy and offline use. Use cloud processing for speed and convenience.
@@ -264,27 +264,27 @@ A: Open the Control Panel (right-click tray icon) and go to Settings. You can se
 A: With local processing, your audio never leaves your device. With cloud processing, audio is processed on Akash Network infrastructure.
 
 **Q: What languages are supported?**
-A: Akash Scribe supports 58 languages including English, Spanish, French, German, Chinese, Japanese, and more. Set your preferred language in the .env file or use auto-detect.
+A: Scribe supports 58 languages including English, Spanish, French, German, Chinese, Japanese, and more. Set your preferred language in the .env file or use auto-detect.
 
 **Q: What is Agent Mode?**
 A: Agent Mode opens a chat overlay where you can have interactive AI conversations using voice. It supports streaming responses from all providers (OpenAI, Anthropic, Gemini, Groq, local) and saves conversation history.
 
 **Q: How does meeting transcription work?**
-A: Connect your Google Calendar in Integrations. When a meeting starts (Zoom, Teams, FaceTime), Akash Scribe detects it and offers to record. Audio is transcribed in real-time via OpenAI Realtime API. On macOS, screen recording permission is required to capture meeting audio.
+A: Connect your Google Calendar in Integrations. When a meeting starts (Zoom, Teams, FaceTime), Scribe detects it and offers to record. Audio is transcribed in real-time via OpenAI Realtime API. On macOS, screen recording permission is required to capture meeting audio.
 
 **Q: Where are my notes stored?**
 A: Notes are stored locally in SQLite with optional cloud sync. They support full-text search (FTS5), folder organization, and AI-powered enhancement actions.
 
-**Q: Does Akash Scribe require Input Monitoring on macOS?**
-A: No. As of v1.6.0, Akash Scribe uses NSEvent monitors instead of CGEvent taps, eliminating the Input Monitoring permission requirement. Only Microphone and Accessibility permissions are needed (plus Screen Recording for meeting features).
+**Q: Does Scribe require Input Monitoring on macOS?**
+A: No. As of v1.6.0, Scribe uses NSEvent monitors instead of CGEvent taps, eliminating the Input Monitoring permission requirement. Only Microphone and Accessibility permissions are needed (plus Screen Recording for meeting features).
 
 ## Project Status
 
-Akash Scribe is actively maintained and ready for production use.
+Scribe is actively maintained and ready for production use.
 
 - ✅ Core dictation with local and cloud processing
 - ✅ Cross-platform support (macOS, Windows, Linux)
-- ✅ Akash Scribe Cloud with account system, usage tracking, and subscription management
+- ✅ Scribe Cloud with account system, usage tracking, and subscription management
 - ✅ Multi-provider AI (OpenAI, Anthropic, Gemini, Groq, Mistral, Local)
 - ✅ Agent Mode with streaming chat overlay and conversation history
 - ✅ Google Calendar integration with automatic meeting detection
@@ -301,7 +301,7 @@ Akash Scribe is actively maintained and ready for production use.
 
 ## Acknowledgments
 
-- **[Akash Network](https://akash.network/)** - Decentralized cloud infrastructure powering Akash Scribe Cloud
+- **[Akash Network](https://akash.network/)** - Decentralized cloud infrastructure powering Scribe Cloud
 - **[OpenAI Whisper](https://github.com/openai/whisper)** - The speech recognition model that powers both local and cloud transcription
 - **[whisper.cpp](https://github.com/ggerganov/whisper.cpp)** - High-performance C++ implementation of Whisper for local processing
 - **[NVIDIA Parakeet](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3)** - Fast ASR model for efficient local transcription

@@ -1,6 +1,6 @@
 {
-  "appId": "network.akash.akashscribe",
-  "productName": "Akash Scribe",
+  "appId": "network.akash.scribe",
+  "productName": "Scribe",
   "protocols": {
     "name": "OpenWhispr Protocol",
     "schemes": ["openwhispr"]
@@ -121,9 +121,9 @@
     "notarize": true,
     "extendInfo": {
       "LSUIElement": false,
-      "NSMicrophoneUsageDescription": "Akash Scribe uses the microphone to capture your voice for transcription.",
-      "NSAudioCaptureUsageDescription": "Akash Scribe uses system audio to capture other participants' audio from calls and meetings. Your screen is never recorded.",
-      "NSAccessibilityUsageDescription": "Akash Scribe needs accessibility permissions to paste transcribed text into other applications."
+      "NSMicrophoneUsageDescription": "Scribe uses the microphone to capture your voice for transcription.",
+      "NSAudioCaptureUsageDescription": "Scribe uses system audio to capture other participants' audio from calls and meetings. Your screen is never recorded.",
+      "NSAccessibilityUsageDescription": "Scribe needs accessibility permissions to paste transcribed text into other applications."
     }
   },
   "win": {
@@ -198,7 +198,7 @@
     "include": "resources/nsis/cleanup-models.nsh"
   },
   "dmg": {
-    "title": "Akash Scribe",
+    "title": "Scribe",
     "icon": "src/assets/icon.icns",
     "window": {
       "width": 540,

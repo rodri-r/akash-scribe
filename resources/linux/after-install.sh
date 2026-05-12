@@ -1,16 +1,17 @@
 #!/bin/bash
-# Post-install script for OpenWhispr (deb/rpm)
+# Post-install script for Scribe (deb/rpm)
 # Sets up chrome-sandbox permissions and ydotool daemon prerequisites
-
 set -euo pipefail
 
 # 0. Set SUID bit on chrome-sandbox (required by Electron for Linux sandboxing)
 #    Find it wherever dpkg placed the package files, rather than hardcoding /opt/...
-CHROME_SANDBOX=$(dpkg -L open-whispr 2>/dev/null | grep chrome-sandbox || echo "")
+CHROME_SANDBOX=$(dpkg -L scribe 2>/dev/null | grep chrome-sandbox || echo "")
+
 if [ -z "$CHROME_SANDBOX" ]; then
   # Fallback: conventional electron-builder install path
-  CHROME_SANDBOX="/opt/OpenWhispr/chrome-sandbox"
+  CHROME_SANDBOX="/opt/Scribe/chrome-sandbox"
 fi
+
 if [ -f "$CHROME_SANDBOX" ]; then
   chown root:root "$CHROME_SANDBOX"
   chmod 4755 "$CHROME_SANDBOX"
@@ -78,6 +79,7 @@ if [ -n "$REAL_USER" ]; then
       elif [ -f "/usr/lib/systemd/user/ydotool.service" ]; then
         SERVICE_NAME="ydotool"
       fi
+      
       if [ -n "$SERVICE_NAME" ]; then
         su - "$REAL_USER" -c "XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR systemctl --user daemon-reload" 2>/dev/null || true
         su - "$REAL_USER" -c "XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR systemctl --user enable $SERVICE_NAME" 2>/dev/null || true
